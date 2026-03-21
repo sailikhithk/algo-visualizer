@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Play, Pause, SkipForward, SkipBack, RotateCcw, Zap, Clock, HardDrive, ChevronRight, Code2, BarChart3, BookOpen } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, RotateCcw, Zap, Clock, HardDrive, ChevronRight, Code2, BarChart3, BookOpen, GraduationCap, Loader2 } from 'lucide-react';
 import { detectAlgorithm, extractArrayFromCode, extractGraphFromCode, extractTreeFromCode } from '@/lib/algorithmDetector';
 import type { DetectedAlgorithm } from '@/lib/algorithmDetector';
 import {
@@ -21,6 +21,8 @@ import { TreeVisualizer } from '@/components/TreeVisualizer';
 import { LinkedListVisualizer } from '@/components/LinkedListVisualizer';
 import { SAMPLE_CODES, CATEGORY_SAMPLES } from '@/lib/sampleCode';
 import { PerplexityAttribution } from '@/components/PerplexityAttribution';
+import { TutorPanel, type TutorExplanation } from '@/components/TutorPanel';
+import { apiRequest } from '@/lib/queryClient';
 
 const DEFAULT_CODE = SAMPLE_CODES.bubble_sort.code;
 
@@ -36,6 +38,12 @@ export default function Home() {
   const [maxArrayVal, setMaxArrayVal] = useState(100);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // AI Tutor state
+  const [tutorExplanation, setTutorExplanation] = useState<TutorExplanation | null>(null);
+  const [tutorLoading, setTutorLoading] = useState(false);
+  const [tutorError, setTutorError] = useState<string | null>(null);
+  const [tutorOpen, setTutorOpen] = useState(false);
 
   const generateSteps = useCallback((alg: DetectedAlgorithm, sourceCode: string) => {
     const arr = extractArrayFromCode(sourceCode);
@@ -72,11 +80,42 @@ export default function Home() {
     setIsPlaying(false);
   }, []);
 
+  const fetchTutorExplanation = useCallback(async (sourceCode: string, alg: DetectedAlgorithm) => {
+    if (alg.type === 'unknown') return;
+    setTutorLoading(true);
+    setTutorError(null);
+    setTutorOpen(true);
+    try {
+      const res = await apiRequest('POST', '/api/explain', {
+        code: sourceCode,
+        algorithmName: alg.name,
+        category: alg.category,
+      });
+      const data = await res.json();
+      if (data.explanation) {
+        setTutorExplanation(data.explanation);
+      } else {
+        setTutorError('Could not parse explanation');
+      }
+    } catch (err: any) {
+      setTutorError(err.message || 'Failed to get explanation');
+    } finally {
+      setTutorLoading(false);
+    }
+  }, []);
+
   const handleVisualize = useCallback(() => {
     const alg = detectAlgorithm(code);
     setDetected(alg);
     generateSteps(alg, code);
   }, [code, generateSteps]);
+
+  const handleVisualizeAndLearn = useCallback(() => {
+    const alg = detectAlgorithm(code);
+    setDetected(alg);
+    generateSteps(alg, code);
+    fetchTutorExplanation(code, alg);
+  }, [code, generateSteps, fetchTutorExplanation]);
 
   const loadSample = useCallback((key: string) => {
     const sample = SAMPLE_CODES[key];
@@ -198,15 +237,27 @@ export default function Home() {
                   <Code2 className="w-3.5 h-3.5 text-[hsl(168,80%,48%)]" />
                   <span className="text-xs font-semibold text-foreground">Python Code</span>
                 </div>
-                <Button 
-                  size="sm" 
-                  onClick={handleVisualize}
-                  className="h-7 text-xs bg-[hsl(168,80%,48%)] hover:bg-[hsl(168,80%,55%)] text-[hsl(225,25%,6%)] font-semibold gap-1"
-                  data-testid="button-visualize"
-                >
-                  <Zap className="w-3 h-3" />
-                  Visualize
-                </Button>
+                <div className="flex items-center gap-1.5">
+                  <Button 
+                    size="sm" 
+                    onClick={handleVisualize}
+                    className="h-7 text-xs bg-[hsl(168,80%,48%)] hover:bg-[hsl(168,80%,55%)] text-[hsl(225,25%,6%)] font-semibold gap-1"
+                    data-testid="button-visualize"
+                  >
+                    <Zap className="w-3 h-3" />
+                    Visualize
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleVisualizeAndLearn}
+                    className="h-7 text-xs bg-gradient-to-r from-[hsl(168,80%,48%)] to-[hsl(260,60%,62%)] hover:from-[hsl(168,80%,55%)] hover:to-[hsl(260,60%,68%)] text-white font-semibold gap-1"
+                    disabled={tutorLoading}
+                    data-testid="button-learn"
+                  >
+                    {tutorLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <GraduationCap className="w-3 h-3" />}
+                    Learn
+                  </Button>
+                </div>
               </div>
               <div className="relative flex-1 min-h-[350px]">
                 <div className="absolute left-0 top-0 bottom-0 w-10 bg-muted/30 border-r border-border/30 flex flex-col pt-2">
@@ -383,6 +434,18 @@ export default function Home() {
             )}
           </div>
         </div>
+
+        {/* AI Tutor Panel — Full Width Below */}
+        {tutorOpen && (
+          <div className="mt-4">
+            <TutorPanel
+              explanation={tutorExplanation}
+              isLoading={tutorLoading}
+              error={tutorError}
+              onClose={() => setTutorOpen(false)}
+            />
+          </div>
+        )}
       </main>
 
       <footer className="mt-8 border-t border-border/30 py-4">
