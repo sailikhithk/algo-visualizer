@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import type { VisualizationStep } from '@/lib/visualizationEngine';
+import { useEffect, useRef } from "react";
+import type { VisualizationStep } from "@/lib/visualizationEngine";
 
 interface GraphVisualizerProps {
   step: VisualizationStep | null;
@@ -13,7 +13,7 @@ export function GraphVisualizer({ step, nodes, edges }: GraphVisualizerProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
@@ -41,8 +41,10 @@ export function GraphVisualizer({ step, nodes, edges }: GraphVisualizerProps) {
     });
 
     const visited = new Set(step?.graphVisited || []);
-    const current = step?.graphCurrent || '';
-    const edgeHL = new Set((step?.graphEdgeHighlight || []).map(e => `${e[0]}-${e[1]}`));
+    const current = step?.graphCurrent || "";
+    const edgeHL = new Set(
+      (step?.graphEdgeHighlight || []).map((e) => `${e[0]}-${e[1]}`),
+    );
 
     // Draw edges
     for (const [u, v] of edges) {
@@ -55,7 +57,11 @@ export function GraphVisualizer({ step, nodes, edges }: GraphVisualizerProps) {
       ctx.beginPath();
       ctx.moveTo(from.x, from.y);
       ctx.lineTo(to.x, to.y);
-      ctx.strokeStyle = isHighlighted ? '#2dd4bf' : visited.has(u) && visited.has(v) ? 'rgba(139,92,246,0.5)' : 'rgba(100,100,120,0.3)';
+      ctx.strokeStyle = isHighlighted
+        ? "#2dd4bf"
+        : visited.has(u) && visited.has(v)
+          ? "rgba(139,92,246,0.5)"
+          : "rgba(100,100,120,0.3)";
       ctx.lineWidth = isHighlighted ? 3 : 1.5;
       ctx.stroke();
 
@@ -66,9 +72,15 @@ export function GraphVisualizer({ step, nodes, edges }: GraphVisualizerProps) {
       const arrowY = to.y - 22 * Math.sin(angle);
       ctx.beginPath();
       ctx.moveTo(arrowX, arrowY);
-      ctx.lineTo(arrowX - arrowLen * Math.cos(angle - 0.4), arrowY - arrowLen * Math.sin(angle - 0.4));
+      ctx.lineTo(
+        arrowX - arrowLen * Math.cos(angle - 0.4),
+        arrowY - arrowLen * Math.sin(angle - 0.4),
+      );
       ctx.moveTo(arrowX, arrowY);
-      ctx.lineTo(arrowX - arrowLen * Math.cos(angle + 0.4), arrowY - arrowLen * Math.sin(angle + 0.4));
+      ctx.lineTo(
+        arrowX - arrowLen * Math.cos(angle + 0.4),
+        arrowY - arrowLen * Math.sin(angle + 0.4),
+      );
       ctx.stroke();
     }
 
@@ -81,43 +93,55 @@ export function GraphVisualizer({ step, nodes, edges }: GraphVisualizerProps) {
 
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, 20, 0, Math.PI * 2);
-      
+
       if (isCurrent) {
-        ctx.fillStyle = '#2dd4bf';
-        ctx.shadowColor = '#2dd4bf';
+        ctx.fillStyle = "#2dd4bf";
+        ctx.shadowColor = "#2dd4bf";
         ctx.shadowBlur = 15;
       } else if (isVisited) {
-        ctx.fillStyle = '#8b5cf6';
-        ctx.shadowColor = '#8b5cf6';
+        ctx.fillStyle = "#8b5cf6";
+        ctx.shadowColor = "#8b5cf6";
         ctx.shadowBlur = 10;
       } else {
-        ctx.fillStyle = 'rgba(60,60,80,0.8)';
+        ctx.fillStyle = "rgba(60,60,80,0.8)";
         ctx.shadowBlur = 0;
       }
       ctx.fill();
       ctx.shadowBlur = 0;
 
-      ctx.strokeStyle = isCurrent ? '#2dd4bf' : isVisited ? '#8b5cf6' : 'rgba(100,100,120,0.5)';
+      ctx.strokeStyle = isCurrent
+        ? "#2dd4bf"
+        : isVisited
+          ? "#8b5cf6"
+          : "rgba(100,100,120,0.5)";
       ctx.lineWidth = 2;
       ctx.stroke();
 
       // Label
-      ctx.fillStyle = isCurrent ? '#0d1117' : '#e4e4e7';
-      ctx.font = '600 14px JetBrains Mono, monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
+      ctx.fillStyle = isCurrent ? "#0d1117" : "#e4e4e7";
+      ctx.font = "600 14px JetBrains Mono, monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
       ctx.fillText(node, pos.x, pos.y);
     }
   }, [step, nodes, edges]);
 
   return (
-    <div className="w-full h-64 relative" data-testid="graph-visualizer">
+    <div
+      className="w-full h-full min-h-[140px] relative"
+      data-testid="graph-visualizer"
+    >
       <canvas ref={canvasRef} className="w-full h-full" />
       {step?.graphQueue && step.graphQueue.length > 0 && (
         <div className="absolute bottom-2 left-2 flex items-center gap-1 text-xs font-mono">
           <span className="text-muted-foreground">Queue:</span>
           {step.graphQueue.map((n, i) => (
-            <span key={i} className="px-1.5 py-0.5 bg-muted rounded text-foreground">{n}</span>
+            <span
+              key={i}
+              className="px-1.5 py-0.5 bg-muted rounded text-foreground"
+            >
+              {n}
+            </span>
           ))}
         </div>
       )}

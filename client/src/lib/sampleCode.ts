@@ -2,7 +2,7 @@
 
 export const SAMPLE_CODES: Record<string, { title: string; code: string }> = {
   bubble_sort: {
-    title: 'Bubble Sort',
+    title: "Bubble Sort",
     code: `def bubble_sort(arr):
     n = len(arr)
     for i in range(n - 1):
@@ -12,10 +12,10 @@ export const SAMPLE_CODES: Record<string, { title: string; code: string }> = {
     return arr
 
 arr = [64, 34, 25, 12, 22, 11, 90, 45]
-print(bubble_sort(arr))`
+print(bubble_sort(arr))`,
   },
   selection_sort: {
-    title: 'Selection Sort',
+    title: "Selection Sort",
     code: `def selection_sort(arr):
     n = len(arr)
     for i in range(n):
@@ -27,10 +27,10 @@ print(bubble_sort(arr))`
     return arr
 
 arr = [64, 25, 12, 22, 11, 90, 45, 78]
-print(selection_sort(arr))`
+print(selection_sort(arr))`,
   },
   insertion_sort: {
-    title: 'Insertion Sort',
+    title: "Insertion Sort",
     code: `def insertion_sort(arr):
     for i in range(1, len(arr)):
         key = arr[i]
@@ -42,10 +42,10 @@ print(selection_sort(arr))`
     return arr
 
 arr = [12, 11, 13, 5, 6, 45, 23, 78]
-print(insertion_sort(arr))`
+print(insertion_sort(arr))`,
   },
   merge_sort: {
-    title: 'Merge Sort',
+    title: "Merge Sort",
     code: `def merge_sort(arr):
     if len(arr) <= 1:
         return arr
@@ -71,10 +71,10 @@ def merge(left, right):
     return result
 
 arr = [38, 27, 43, 3, 9, 82, 10, 55]
-print(merge_sort(arr))`
+print(merge_sort(arr))`,
   },
   quick_sort: {
-    title: 'Quick Sort',
+    title: "Quick Sort",
     code: `def quick_sort(arr, low=0, high=None):
     if high is None:
         high = len(arr) - 1
@@ -95,10 +95,10 @@ def partition(arr, low, high):
     return i + 1
 
 arr = [10, 80, 30, 90, 40, 50, 70, 20]
-print(quick_sort(arr))`
+print(quick_sort(arr))`,
   },
   binary_search: {
-    title: 'Binary Search',
+    title: "Binary Search",
     code: `def binary_search(arr, target):
     low, high = 0, len(arr) - 1
     
@@ -115,10 +115,10 @@ print(quick_sort(arr))`
 
 arr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]
 target = 23
-print(binary_search(arr, target))`
+print(binary_search(arr, target))`,
   },
   bfs: {
-    title: 'BFS (Breadth-First Search)',
+    title: "BFS (Breadth-First Search)",
     code: `from collections import deque
 
 def bfs(graph, start):
@@ -146,10 +146,10 @@ graph = {
     'E': ['F'],
     'F': []
 }
-print(bfs(graph, 'A'))`
+print(bfs(graph, 'A'))`,
   },
   dfs: {
-    title: 'DFS (Depth-First Search)',
+    title: "DFS (Depth-First Search)",
     code: `def dfs(graph, start, visited=None):
     if visited is None:
         visited = set()
@@ -171,10 +171,10 @@ graph = {
     'E': ['F'],
     'F': []
 }
-print(dfs(graph, 'A'))`
+print(dfs(graph, 'A'))`,
   },
   inorder: {
-    title: 'Inorder Traversal',
+    title: "Inorder Traversal",
     code: `class TreeNode:
     def __init__(self, val):
         self.val = val
@@ -197,10 +197,10 @@ root.left.right = TreeNode(40)
 root.right.left = TreeNode(60)
 root.right.right = TreeNode(80)
 
-print(inorder_traversal(root))`
+print(inorder_traversal(root))`,
   },
   dp_fibonacci: {
-    title: 'Fibonacci (DP)',
+    title: "Fibonacci (DP)",
     code: `def fibonacci(n):
     dp = [0] * (n + 1)
     dp[1] = 1
@@ -211,10 +211,10 @@ print(inorder_traversal(root))`
     return dp[n]
 
 n = 10
-print(f"Fibonacci({n}) = {fibonacci(n)}")`
+print(f"Fibonacci({n}) = {fibonacci(n)}")`,
   },
   dp_coin_change: {
-    title: 'Coin Change (DP)',
+    title: "Coin Change (DP)",
     code: `def coin_change(coins, amount):
     dp = [float('inf')] * (amount + 1)
     dp[0] = 0
@@ -227,10 +227,10 @@ print(f"Fibonacci({n}) = {fibonacci(n)}")`
 
 coins = [1, 3, 4]
 amount = 6
-print(coin_change(coins, amount))`
+print(coin_change(coins, amount))`,
   },
   linked_list_reverse: {
-    title: 'Reverse Linked List',
+    title: "Reverse Linked List",
     code: `class ListNode:
     def __init__(self, val=0, next=None):
         self.val = val
@@ -250,10 +250,10 @@ def reverse_linked_list(head):
 
 # Create: 1 -> 2 -> 3 -> 4 -> 5
 head = ListNode(1, ListNode(2, ListNode(3, ListNode(4, ListNode(5)))))
-reversed_head = reverse_linked_list(head)`
+reversed_head = reverse_linked_list(head)`,
   },
   two_pointers: {
-    title: 'Two Pointers - Two Sum',
+    title: "Two Pointers - Two Sum",
     code: `def two_sum_sorted(arr, target):
     left, right = 0, len(arr) - 1
     
@@ -271,10 +271,10 @@ reversed_head = reverse_linked_list(head)`
 
 arr = [2, 7, 11, 15, 20, 25, 30]
 target = 22
-print(two_sum_sorted(arr, target))`
+print(two_sum_sorted(arr, target))`,
   },
   sliding_window: {
-    title: 'Sliding Window - Max Sum',
+    title: "Sliding Window - Max Sum",
     code: `def max_sum_subarray(arr, k):
     window_sum = sum(arr[:k])
     max_sum = window_sum
@@ -287,10 +287,10 @@ print(two_sum_sorted(arr, target))`
 
 arr = [2, 1, 5, 1, 3, 2]
 k = 3
-print(max_sum_subarray(arr, k))`
+print(max_sum_subarray(arr, k))`,
   },
   stack: {
-    title: 'Stack Operations',
+    title: "Stack Operations",
     code: `class Stack:
     def __init__(self):
         self.stack = []
@@ -313,18 +313,24 @@ s.push(10)
 s.push(20)
 s.push(30)
 s.pop()
-s.push(40)`
+s.push(40)`,
   },
 };
 
 export const CATEGORY_SAMPLES: Record<string, string[]> = {
-  'Sorting': ['bubble_sort', 'selection_sort', 'insertion_sort', 'merge_sort', 'quick_sort'],
-  'Searching': ['binary_search'],
-  'Graph': ['bfs', 'dfs'],
-  'Tree': ['inorder'],
-  'Dynamic Programming': ['dp_fibonacci', 'dp_coin_change'],
-  'Linked List': ['linked_list_reverse'],
-  'Two Pointers': ['two_pointers'],
-  'Sliding Window': ['sliding_window'],
-  'Stack & Queue': ['stack'],
+  Sorting: [
+    "bubble_sort",
+    "selection_sort",
+    "insertion_sort",
+    "merge_sort",
+    "quick_sort",
+  ],
+  Searching: ["binary_search"],
+  Graph: ["bfs", "dfs"],
+  Tree: ["inorder"],
+  "Dynamic Programming": ["dp_fibonacci", "dp_coin_change"],
+  "Linked List": ["linked_list_reverse"],
+  "Two Pointers": ["two_pointers"],
+  "Sliding Window": ["sliding_window"],
+  "Stack & Queue": ["stack"],
 };

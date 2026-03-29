@@ -1,6 +1,38 @@
+# Dependencies
 node_modules
+
+# Build output
 dist
-.DS_Store
 server/public
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+*.swp
+*.swo
+
+# Vite
 vite.config.ts.*
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Archives
 *.tar.gz
+
+# Test scratch files
+*.pyc
+__pycache__
+test.py
