@@ -73,7 +73,7 @@ function DPTableVisualizer({ step }: { step: VisualizationStep }) {
                   <td
                     key={c}
                     className={`w-8 h-8 text-center border border-border/40 text-[11px] font-mono transition-colors duration-200
-                      ${isHL ? "bg-[hsl(168,80%,48%)] text-[hsl(225,25%,6%)] font-bold" : isFilled ? "bg-[hsl(260,60%,62%/0.3)] text-foreground" : "bg-muted/20 text-muted-foreground"}`}
+                      ${isHL ? "bg-primary text-primary-foreground font-bold" : isFilled ? "bg-accent/30 text-foreground" : "bg-muted/20 text-muted-foreground"}`}
                   >
                     {val === -999 ? "-∞" : val === 999 ? "+∞" : val}
                   </td>

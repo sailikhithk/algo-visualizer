@@ -51,9 +51,7 @@ export function AlgorithmInfo({ detected, aiVizResult }: AlgorithmInfoProps) {
               Time
             </span>
           </div>
-          <p className="text-sm font-mono font-bold text-[hsl(168,80%,48%)]">
-            {time}
-          </p>
+          <p className="text-sm font-mono font-bold text-primary">{time}</p>
         </div>
         <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -62,9 +60,7 @@ export function AlgorithmInfo({ detected, aiVizResult }: AlgorithmInfoProps) {
               Space
             </span>
           </div>
-          <p className="text-sm font-mono font-bold text-[hsl(260,60%,62%)]">
-            {space}
-          </p>
+          <p className="text-sm font-mono font-bold text-accent">{space}</p>
         </div>
         <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-muted-foreground">

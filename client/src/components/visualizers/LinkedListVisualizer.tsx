@@ -28,12 +28,12 @@ export function LinkedListVisualizer({ step }: LinkedListVisualizerProps) {
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className={`relative flex flex-col items-center justify-center w-14 h-14 rounded-lg border-2 transition-colors duration-200 ${
               highlight === idx
-                ? "border-[hsl(168,80%,48%)] bg-[hsl(168,80%,48%/0.15)]"
+                ? "border-primary bg-primary/15"
                 : "border-muted bg-card"
             }`}
           >
             <span
-              className={`text-sm font-mono font-bold ${highlight === idx ? "text-[hsl(168,80%,48%)]" : "text-foreground"}`}
+              className={`text-sm font-mono font-bold ${highlight === idx ? "text-primary" : "text-foreground"}`}
             >
               {node.value}
             </span>
@@ -43,7 +43,7 @@ export function LinkedListVisualizer({ step }: LinkedListVisualizerProps) {
                 pIdx === idx ? (
                   <span
                     key={name}
-                    className="text-[9px] font-mono text-[hsl(260,60%,62%)] font-bold whitespace-nowrap"
+                    className="text-[9px] font-mono text-accent font-bold whitespace-nowrap"
                   >
                     {name}
                   </span>

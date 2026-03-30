@@ -66,7 +66,7 @@ export function PlaybackControls({
           </Tooltip>
           <Button
             size="icon"
-            className="h-9 w-9 rounded-full bg-[hsl(168,80%,48%)] hover:bg-[hsl(168,80%,55%)] text-[hsl(225,25%,6%)]"
+            className="h-9 w-9 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground"
             onClick={onPlayToggle}
             disabled={totalSteps === 0}
             data-testid="button-play"

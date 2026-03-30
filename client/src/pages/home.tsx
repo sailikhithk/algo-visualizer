@@ -294,7 +294,7 @@ export default function Home() {
     if (aiVizLoading) {
       return (
         <div className="flex flex-col items-center justify-center h-40 text-muted-foreground gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-[hsl(168,80%,48%)]" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-sm">AI is analyzing your code…</p>
         </div>
       );
@@ -352,7 +352,7 @@ export default function Home() {
     : null;
 
   return (
-    <div className="h-screen flex flex-col bg-background dark overflow-hidden">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       <Header />
 
       <main className="flex-1 min-h-0 overflow-y-auto">

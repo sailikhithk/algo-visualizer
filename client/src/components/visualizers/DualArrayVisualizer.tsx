@@ -41,9 +41,8 @@ function ArrayRow({
           const isPartBorder = partition !== undefined && idx === partition - 1;
 
           let bg = "bg-muted/40 border-muted";
-          if (isHL) bg = "bg-[hsl(168,80%,48%)] border-[hsl(168,80%,60%)]";
-          else if (isSorted)
-            bg = "bg-[hsl(260,60%,62%)] border-[hsl(260,60%,70%)]";
+          if (isHL) bg = "bg-primary border-primary/80";
+          else if (isSorted) bg = "bg-accent border-accent/80";
 
           // pointer names for this index
           const ptrNames = Object.entries(pointers)
@@ -57,7 +56,7 @@ function ArrayRow({
                 {ptrNames.map((n) => (
                   <span
                     key={n}
-                    className="text-[9px] font-bold font-mono text-[hsl(168,80%,48%)] whitespace-nowrap leading-none px-0.5"
+                    className="text-[9px] font-bold font-mono text-primary whitespace-nowrap leading-none px-0.5"
                   >
                     {n}
                   </span>
@@ -68,12 +67,12 @@ function ArrayRow({
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                className={`relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded border-2 font-mono text-xs font-bold transition-colors duration-200 ${bg} ${isHL ? "text-[hsl(225,25%,6%)]" : "text-foreground"}`}
+                className={`relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded border-2 font-mono text-xs font-bold transition-colors duration-200 ${bg} ${isHL ? "text-primary-foreground" : "text-foreground"}`}
               >
                 {displayVal(val)}
                 {/* partition divider — right edge of this cell */}
                 {isPartBorder && (
-                  <div className="absolute -right-[3px] top-0 h-full w-[3px] bg-[hsl(45,90%,60%)] rounded" />
+                  <div className="absolute -right-[3px] top-0 h-full w-[3px] bg-chart-3 rounded" />
                 )}
               </motion.div>
               {/* index label below */}
@@ -88,7 +87,7 @@ function ArrayRow({
           partition >= 0 &&
           partition <= arr.length && (
             <div
-              className="absolute -top-0 text-[8px] font-mono text-[hsl(45,90%,60%)] font-bold whitespace-nowrap"
+              className="absolute -top-0 text-[8px] font-mono text-chart-3 font-bold whitespace-nowrap"
               style={{ left: `${partition * 44 - 8}px`, top: "-18px" }}
             >
               cut
@@ -156,7 +155,7 @@ export function DualArrayVisualizer({ step }: DualArrayVisualizerProps) {
               <span className="text-[9px] font-mono text-muted-foreground">
                 {k}
               </span>
-              <span className="text-[9px] font-mono font-bold text-[hsl(168,80%,48%)]">
+              <span className="text-[9px] font-mono font-bold text-primary">
                 {v === -999 ? "-∞" : v === 999 ? "+∞" : String(v)}
               </span>
             </div>

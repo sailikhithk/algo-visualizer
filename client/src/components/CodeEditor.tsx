@@ -28,7 +28,7 @@ export function CodeEditor({
     <Card className="flex-1 min-h-0 flex flex-col bg-card border-border/50 overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border/50">
         <div className="flex items-center gap-2">
-          <Code2 className="w-3.5 h-3.5 text-[hsl(168,80%,48%)]" />
+          <Code2 className="w-3.5 h-3.5 text-primary" />
           <span className="text-xs font-semibold text-foreground">
             Python Code
           </span>
@@ -37,7 +37,7 @@ export function CodeEditor({
           <Button
             size="sm"
             onClick={onVisualize}
-            className="h-7 text-xs bg-[hsl(168,80%,48%)] hover:bg-[hsl(168,80%,55%)] text-[hsl(225,25%,6%)] font-semibold gap-1"
+            className="h-7 text-xs bg-primary hover:bg-primary/90 text-primary-foreground font-semibold gap-1"
             data-testid="button-visualize"
           >
             <Zap className="w-3 h-3" />
@@ -46,7 +46,7 @@ export function CodeEditor({
           <Button
             size="sm"
             onClick={onAIVisualize}
-            className="h-7 text-xs bg-[hsl(260,60%,62%)] hover:bg-[hsl(260,60%,70%)] text-white font-semibold gap-1"
+            className="h-7 text-xs bg-accent hover:bg-accent/90 text-accent-foreground font-semibold gap-1"
             disabled={aiVizLoading}
             data-testid="button-ai-visualize"
           >
@@ -60,7 +60,7 @@ export function CodeEditor({
           <Button
             size="sm"
             onClick={onLearn}
-            className="h-7 text-xs bg-gradient-to-r from-[hsl(168,80%,48%)] to-[hsl(260,60%,62%)] hover:from-[hsl(168,80%,55%)] hover:to-[hsl(260,60%,68%)] text-white font-semibold gap-1"
+            className="h-7 text-xs bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white font-semibold gap-1"
             disabled={tutorLoading}
             data-testid="button-learn"
           >

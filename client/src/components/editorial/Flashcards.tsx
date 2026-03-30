@@ -87,14 +87,14 @@ export function Flashcards({ cards }: FlashcardsProps) {
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className={`w-full min-h-[120px] rounded-lg border-2 p-4 flex flex-col justify-center ${
               flipped
-                ? "bg-[hsl(168,80%,48%/0.06)] border-[hsl(168,80%,48%/0.2)]"
+                ? "bg-primary/[0.06] border-primary/20"
                 : "bg-muted/20 border-border/50"
             }`}
           >
             <div className="flex items-start gap-2">
               <span
                 className={`text-[9px] font-bold uppercase tracking-wider flex-shrink-0 mt-0.5 ${
-                  flipped ? "text-[hsl(168,80%,48%)]" : "text-muted-foreground"
+                  flipped ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 {flipped ? "A" : "Q"}
@@ -137,9 +137,7 @@ export function Flashcards({ cards }: FlashcardsProps) {
                 setFlipped(false);
               }}
               className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                i === currentIndex
-                  ? "bg-[hsl(168,80%,48%)]"
-                  : "bg-muted-foreground/30"
+                i === currentIndex ? "bg-primary" : "bg-muted-foreground/30"
               }`}
             />
           ))}

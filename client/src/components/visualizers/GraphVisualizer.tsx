@@ -16,6 +16,8 @@ export function GraphVisualizer({ step, nodes, edges }: GraphVisualizerProps) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const isDark = document.documentElement.classList.contains("dark");
+
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * dpr;
@@ -61,7 +63,9 @@ export function GraphVisualizer({ step, nodes, edges }: GraphVisualizerProps) {
         ? "#2dd4bf"
         : visited.has(u) && visited.has(v)
           ? "rgba(139,92,246,0.5)"
-          : "rgba(100,100,120,0.3)";
+          : isDark
+            ? "rgba(100,100,120,0.3)"
+            : "rgba(180,180,195,0.5)";
       ctx.lineWidth = isHighlighted ? 3 : 1.5;
       ctx.stroke();
 
@@ -103,7 +107,7 @@ export function GraphVisualizer({ step, nodes, edges }: GraphVisualizerProps) {
         ctx.shadowColor = "#8b5cf6";
         ctx.shadowBlur = 10;
       } else {
-        ctx.fillStyle = "rgba(60,60,80,0.8)";
+        ctx.fillStyle = isDark ? "rgba(60,60,80,0.8)" : "rgba(210,215,225,0.9)";
         ctx.shadowBlur = 0;
       }
       ctx.fill();
@@ -113,12 +117,20 @@ export function GraphVisualizer({ step, nodes, edges }: GraphVisualizerProps) {
         ? "#2dd4bf"
         : isVisited
           ? "#8b5cf6"
-          : "rgba(100,100,120,0.5)";
+          : isDark
+            ? "rgba(100,100,120,0.5)"
+            : "rgba(180,180,195,0.6)";
       ctx.lineWidth = 2;
       ctx.stroke();
 
       // Label
-      ctx.fillStyle = isCurrent ? "#0d1117" : "#e4e4e7";
+      ctx.fillStyle = isCurrent
+        ? isDark
+          ? "#0d1117"
+          : "#ffffff"
+        : isDark
+          ? "#e4e4e7"
+          : "#1a202c";
       ctx.font = "600 14px JetBrains Mono, monospace";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";

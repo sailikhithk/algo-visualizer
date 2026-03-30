@@ -30,9 +30,9 @@ export function ArrayVisualizer({ step, maxVal }: ArrayVisualizerProps) {
           if (swapping.has(idx)) {
             bgClass = "bg-red-500";
           } else if (highlights.has(idx)) {
-            bgClass = "bg-[hsl(168,80%,48%)]";
+            bgClass = "bg-primary";
           } else if (sorted.has(idx)) {
-            bgClass = "bg-[hsl(260,60%,62%)]";
+            bgClass = "bg-accent";
           }
 
           return (
@@ -65,7 +65,7 @@ export function ArrayVisualizer({ step, maxVal }: ArrayVisualizerProps) {
                   pIdx === idx ? (
                     <span
                       key={name}
-                      className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] font-mono text-[hsl(168,80%,48%)] whitespace-nowrap font-bold"
+                      className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] font-mono text-primary whitespace-nowrap font-bold"
                     >
                       {name}
                     </span>

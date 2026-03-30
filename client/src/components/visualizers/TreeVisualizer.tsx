@@ -39,6 +39,7 @@ function drawTree(
   ctx: CanvasRenderingContext2D,
   layout: TreeLayout | null,
   highlighted: Set<number>,
+  isDark: boolean,
 ) {
   if (!layout) return;
 
@@ -50,10 +51,12 @@ function drawTree(
     ctx.strokeStyle =
       highlighted.has(layout.value) && highlighted.has(layout.left.value)
         ? "#2dd4bf"
-        : "rgba(100,100,120,0.4)";
+        : isDark
+          ? "rgba(100,100,120,0.4)"
+          : "rgba(180,180,195,0.5)";
     ctx.lineWidth = highlighted.has(layout.value) ? 2.5 : 1.5;
     ctx.stroke();
-    drawTree(ctx, layout.left, highlighted);
+    drawTree(ctx, layout.left, highlighted, isDark);
   }
   if (layout.right) {
     ctx.beginPath();
@@ -62,10 +65,12 @@ function drawTree(
     ctx.strokeStyle =
       highlighted.has(layout.value) && highlighted.has(layout.right.value)
         ? "#2dd4bf"
-        : "rgba(100,100,120,0.4)";
+        : isDark
+          ? "rgba(100,100,120,0.4)"
+          : "rgba(180,180,195,0.5)";
     ctx.lineWidth = highlighted.has(layout.value) ? 2.5 : 1.5;
     ctx.stroke();
-    drawTree(ctx, layout.right, highlighted);
+    drawTree(ctx, layout.right, highlighted, isDark);
   }
 
   // Draw node
@@ -78,17 +83,27 @@ function drawTree(
     ctx.shadowColor = "#2dd4bf";
     ctx.shadowBlur = 12;
   } else {
-    ctx.fillStyle = "rgba(60,60,80,0.8)";
+    ctx.fillStyle = isDark ? "rgba(60,60,80,0.8)" : "rgba(210,215,225,0.9)";
     ctx.shadowBlur = 0;
   }
   ctx.fill();
   ctx.shadowBlur = 0;
 
-  ctx.strokeStyle = isHL ? "#2dd4bf" : "rgba(100,100,120,0.5)";
+  ctx.strokeStyle = isHL
+    ? "#2dd4bf"
+    : isDark
+      ? "rgba(100,100,120,0.5)"
+      : "rgba(180,180,195,0.6)";
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  ctx.fillStyle = isHL ? "#0d1117" : "#e4e4e7";
+  ctx.fillStyle = isHL
+    ? isDark
+      ? "#0d1117"
+      : "#ffffff"
+    : isDark
+      ? "#e4e4e7"
+      : "#1a202c";
   ctx.font = "600 12px JetBrains Mono, monospace";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -104,6 +119,8 @@ export function TreeVisualizer({ step, tree }: TreeVisualizerProps) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const isDark = document.documentElement.classList.contains("dark");
+
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * dpr;
@@ -116,7 +133,7 @@ export function TreeVisualizer({ step, tree }: TreeVisualizerProps) {
 
     const layout = layoutTree(tree, w / 2, 30, w * 0.22, 0);
     const highlighted = new Set(step?.treeHighlight || []);
-    drawTree(ctx, layout, highlighted);
+    drawTree(ctx, layout, highlighted, isDark);
   }, [step, tree]);
 
   return (
