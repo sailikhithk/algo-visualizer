@@ -114,7 +114,7 @@ export function CodeEditor({
         {/* Syntax-highlighted overlay */}
         <pre
           ref={preRef}
-          className="absolute inset-0 pl-12 p-2 font-mono text-xs leading-[1.65rem] whitespace-pre overflow-hidden pointer-events-none select-none m-0"
+          className="absolute inset-0 pl-12 p-2 font-mono text-xs leading-[1.65rem] whitespace-pre overflow-hidden pointer-events-none select-none m-0 text-[#e6edf3]"
           aria-hidden="true"
           dangerouslySetInnerHTML={{ __html: highlightedHtml + "\n" }}
         />
