@@ -1,7 +1,8 @@
-import { useRef } from "react";
+import { useRef, useMemo, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Code2, Zap, Brain, GraduationCap, Loader2 } from "lucide-react";
+import { Code2, Zap, Brain, GraduationCap, Loader2, Save } from "lucide-react";
+import { highlightPython } from "@/lib/pythonHighlighter";
 
 interface CodeEditorProps {
   code: string;
@@ -9,6 +10,7 @@ interface CodeEditorProps {
   onVisualize: () => void;
   onAIVisualize: () => void;
   onLearn: () => void;
+  onSave?: () => void;
   aiVizLoading: boolean;
   tutorLoading: boolean;
 }
@@ -19,10 +21,21 @@ export function CodeEditor({
   onVisualize,
   onAIVisualize,
   onLearn,
+  onSave,
   aiVizLoading,
   tutorLoading,
 }: CodeEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
+
+  const highlightedHtml = useMemo(() => highlightPython(code), [code]);
+
+  const handleScroll = useCallback(() => {
+    if (textareaRef.current && preRef.current) {
+      preRef.current.scrollTop = textareaRef.current.scrollTop;
+      preRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    }
+  }, []);
 
   return (
     <Card className="flex-1 min-h-0 flex flex-col bg-card border-border/50 overflow-hidden">
@@ -34,6 +47,19 @@ export function CodeEditor({
           </span>
         </div>
         <div className="flex items-center gap-1.5">
+          {onSave && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onSave}
+              className="h-7 text-xs font-semibold gap-1"
+              data-testid="button-save"
+              title="Save code snippet"
+            >
+              <Save className="w-3 h-3" />
+              Save
+            </Button>
+          )}
           <Button
             size="sm"
             onClick={onVisualize}
@@ -75,7 +101,7 @@ export function CodeEditor({
       </div>
       {/* Code area always dark — matches Codecademy / Educative editors */}
       <div className="relative flex-1 min-h-0 overflow-hidden bg-[#0d1117] dark:bg-transparent rounded-b-lg">
-        <div className="absolute left-0 top-0 bottom-0 w-10 bg-[#161b22] dark:bg-muted/30 border-r border-[#21262d] dark:border-border/30 flex flex-col pt-2">
+        <div className="absolute left-0 top-0 bottom-0 w-10 bg-[#161b22] dark:bg-muted/30 border-r border-[#21262d] dark:border-border/30 flex flex-col pt-2 z-10">
           {code.split("\n").map((_, i) => (
             <span
               key={i}
@@ -85,11 +111,20 @@ export function CodeEditor({
             </span>
           ))}
         </div>
+        {/* Syntax-highlighted overlay */}
+        <pre
+          ref={preRef}
+          className="absolute inset-0 pl-12 p-2 font-mono text-xs leading-[1.65rem] whitespace-pre overflow-hidden pointer-events-none select-none m-0"
+          aria-hidden="true"
+          dangerouslySetInnerHTML={{ __html: highlightedHtml + "\n" }}
+        />
+        {/* Transparent textarea (user types here) */}
         <textarea
           ref={textareaRef}
           value={code}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full h-full bg-transparent text-[#e6edf3] dark:text-foreground font-mono text-xs leading-[1.65rem] p-2 pl-12 resize-none focus:outline-none"
+          onScroll={handleScroll}
+          className="relative w-full h-full bg-transparent text-transparent caret-[#e6edf3] dark:caret-foreground font-mono text-xs leading-[1.65rem] p-2 pl-12 resize-none focus:outline-none z-[1]"
           spellCheck={false}
           data-testid="input-code"
         />

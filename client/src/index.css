@@ -48,7 +48,7 @@
   --chart-3: 43 96% 56%;
   --chart-4: 340 82% 52%;
   --chart-5: 200 98% 39%;
-  --font-sans: "JetBrains Mono", "Geist", monospace;
+  --font-sans: Arial, Helvetica, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
   --radius: 0.5rem;
@@ -252,8 +252,33 @@
     0 0 20px hsl(168 80% 48% / 0.2);
 }
 
+/* Python syntax highlighting — GitHub Dark theme colors */
+.syn-keyword {
+  color: #ff7b72;
+}
+.syn-builtin {
+  color: #d2a8ff;
+}
+.syn-function {
+  color: #ffa657;
+}
+.syn-string {
+  color: #a5d6ff;
+}
+.syn-comment {
+  color: #8b949e;
+  font-style: italic;
+}
+.syn-number {
+  color: #79c0ff;
+}
+.syn-decorator {
+  color: #ffa657;
+}
+
 /* Visualization canvas animations */
 @keyframes pulse-glow {
+
   0%,
   100% {
     opacity: 0.6;

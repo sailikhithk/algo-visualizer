@@ -2,39 +2,33 @@
 
 export interface VisualizationStep {
   array?: number[];
-  highlights?: number[]; // indices being compared/active
-  swapping?: number[]; // indices being swapped
-  sorted?: number[]; // indices already sorted
+  highlights?: number[];
+  swapping?: number[];
+  sorted?: number[];
   message: string;
-  pointers?: Record<string, number>; // named pointers (left, right, mid, etc.)
-  // Secondary array (for two-array algorithms like Median of Two Sorted Arrays)
+  pointers?: Record<string, number>;
   array2?: number[];
   highlights2?: number[];
   pointers2?: Record<string, number>;
-  partition1?: number; // visual divider index for array1
-  partition2?: number; // visual divider index for array2
-  variables?: Record<string, string | number>; // key variables to display
-  // For trees
-  treeHighlight?: number[]; // node values being visited
-  treeEdgeHighlight?: [number, number][]; // edges being traversed
-  // For graphs
+  partition1?: number;
+  partition2?: number;
+  variables?: Record<string, string | number>;
+  treeHighlight?: number[];
+  treeEdgeHighlight?: [number, number][];
   graphVisited?: string[];
   graphCurrent?: string;
   graphQueue?: string[];
   graphEdgeHighlight?: [string, string][];
-  // For DP
   dpTable?: number[][];
-  dpHighlight?: [number, number]; // [row, col]
+  dpHighlight?: [number, number];
   dpFilled?: [number, number][];
-  // For linked list
   linkedList?: { value: number; next?: boolean }[];
   llHighlight?: number;
   llPointers?: Record<string, number>;
-  // Generic
   phase?: string;
 }
 
-// ============ SORTING ALGORITHMS ============
+// ─── Sorting ─────────────────────────────────────────────────────────────────
 
 export function* bubbleSortSteps(arr: number[]): Generator<VisualizationStep> {
   const a = [...arr];
@@ -58,12 +52,11 @@ export function* bubbleSortSteps(arr: number[]): Generator<VisualizationStep> {
         message: `Comparing ${a[j]} and ${a[j + 1]}`,
         phase: "compare",
       };
-
       if (a[j] > a[j + 1]) {
         yield {
           array: [...a],
-          highlights: [j, j + 1],
           swapping: [j, j + 1],
+          highlights: [j, j + 1],
           sorted: [...sorted],
           message: `Swapping ${a[j]} and ${a[j + 1]}`,
           phase: "swap",
@@ -73,7 +66,7 @@ export function* bubbleSortSteps(arr: number[]): Generator<VisualizationStep> {
           array: [...a],
           highlights: [j, j + 1],
           sorted: [...sorted],
-          message: `Swapped! Now ${a[j]}, ${a[j + 1]}`,
+          message: `After swap: ${a[j]}, ${a[j + 1]}`,
           phase: "after-swap",
         };
       }
@@ -83,7 +76,7 @@ export function* bubbleSortSteps(arr: number[]): Generator<VisualizationStep> {
       array: [...a],
       highlights: [],
       sorted: [...sorted],
-      message: `Pass ${i + 1} complete. ${a[n - 1 - i]} is in position.`,
+      message: `Pass ${i + 1} done — ${a[n - 1 - i]} locked in place`,
       phase: "pass-done",
     };
   }
@@ -118,7 +111,7 @@ export function* selectionSortSteps(
       array: [...a],
       highlights: [i],
       sorted: [...sorted],
-      message: `Finding minimum from index ${i}`,
+      message: `Scanning for minimum from index ${i}`,
       pointers: { min: minIdx },
       phase: "find-min",
     };
@@ -129,7 +122,7 @@ export function* selectionSortSteps(
         highlights: [minIdx, j],
         sorted: [...sorted],
         message: `Comparing ${a[minIdx]} with ${a[j]}`,
-        pointers: { min: minIdx, current: j },
+        pointers: { min: minIdx, scan: j },
         phase: "compare",
       };
       if (a[j] < a[minIdx]) {
@@ -138,7 +131,7 @@ export function* selectionSortSteps(
           array: [...a],
           highlights: [minIdx],
           sorted: [...sorted],
-          message: `New minimum found: ${a[minIdx]} at index ${minIdx}`,
+          message: `New minimum: ${a[minIdx]} at index ${minIdx}`,
           pointers: { min: minIdx },
           phase: "new-min",
         };
@@ -185,7 +178,7 @@ export function* insertionSortSteps(
     array: [...a],
     highlights: [],
     sorted: [0],
-    message: "Starting Insertion Sort. First element is trivially sorted.",
+    message: "Starting Insertion Sort — first element is trivially sorted",
     phase: "init",
   };
 
@@ -206,7 +199,7 @@ export function* insertionSortSteps(
         array: [...a],
         highlights: [j, j + 1],
         sorted: [...sorted],
-        message: `${a[j]} > ${key}, shifting right`,
+        message: `${a[j]} > ${key} — shifting right`,
         phase: "shift",
       };
       a[j + 1] = a[j];
@@ -240,29 +233,14 @@ export function* insertionSortSteps(
 
 export function* mergeSortSteps(arr: number[]): Generator<VisualizationStep> {
   const a = [...arr];
-  const steps: VisualizationStep[] = [];
+  const n = a.length;
+  const sortedSet = new Set<number>();
 
-  function* mergeSort(
-    a: number[],
+  function* merge(
     l: number,
+    m: number,
     r: number,
-    fullArr: number[],
   ): Generator<VisualizationStep> {
-    if (l >= r) return;
-    const m = Math.floor((l + r) / 2);
-
-    yield {
-      array: [...fullArr],
-      highlights: Array.from({ length: r - l + 1 }, (_, i) => l + i),
-      sorted: [],
-      message: `Dividing [${l}..${r}] at midpoint ${m}`,
-      phase: "divide",
-    };
-
-    yield* mergeSort(a, l, m, fullArr);
-    yield* mergeSort(a, m + 1, r, fullArr);
-
-    // Merge
     const left = a.slice(l, m + 1);
     const right = a.slice(m + 1, r + 1);
     let i = 0,
@@ -270,51 +248,98 @@ export function* mergeSortSteps(arr: number[]): Generator<VisualizationStep> {
       k = l;
 
     yield {
-      array: [...fullArr],
-      highlights: Array.from({ length: r - l + 1 }, (_, i) => l + i),
-      sorted: [],
+      array: [...a],
+      highlights: Array.from({ length: r - l + 1 }, (_, x) => l + x),
+      sorted: [...sortedSet],
       message: `Merging [${l}..${m}] and [${m + 1}..${r}]`,
+      pointers: { L: l, M: m, R: r },
       phase: "merge",
     };
 
     while (i < left.length && j < right.length) {
+      yield {
+        array: [...a],
+        highlights: [k],
+        sorted: [...sortedSet],
+        message: `Comparing ${left[i]} and ${right[j]}`,
+        pointers: { L: l + i, R: m + 1 + j, write: k },
+        phase: "compare",
+      };
       if (left[i] <= right[j]) {
-        fullArr[k] = left[i];
-        a[k] = left[i];
-        i++;
+        a[k] = left[i++];
       } else {
-        fullArr[k] = right[j];
-        a[k] = right[j];
-        j++;
+        a[k] = right[j++];
       }
       yield {
-        array: [...fullArr],
+        array: [...a],
         highlights: [k],
-        sorted: [],
-        message: `Placed ${fullArr[k]} at position ${k}`,
+        sorted: [...sortedSet],
+        message: `Placed ${a[k]} at index ${k}`,
         phase: "place",
       };
       k++;
     }
     while (i < left.length) {
-      fullArr[k] = left[i];
-      a[k] = left[i];
-      i++;
+      a[k] = left[i++];
+      yield {
+        array: [...a],
+        highlights: [k],
+        sorted: [...sortedSet],
+        message: `Copy remaining ${a[k]} at index ${k}`,
+        phase: "place",
+      };
       k++;
     }
     while (j < right.length) {
-      fullArr[k] = right[j];
-      a[k] = right[j];
-      j++;
+      a[k] = right[j++];
+      yield {
+        array: [...a],
+        highlights: [k],
+        sorted: [...sortedSet],
+        message: `Copy remaining ${a[k]} at index ${k}`,
+        phase: "place",
+      };
       k++;
     }
+
+    if (l === 0 && r === n - 1) {
+      for (let x = l; x <= r; x++) sortedSet.add(x);
+    }
+
     yield {
-      array: [...fullArr],
-      highlights: Array.from({ length: r - l + 1 }, (_, i) => l + i),
-      sorted: [],
-      message: `Merged: [${fullArr.slice(l, r + 1).join(", ")}]`,
+      array: [...a],
+      highlights: Array.from({ length: r - l + 1 }, (_, x) => l + x),
+      sorted: [...sortedSet],
+      message: `Merged: [${a.slice(l, r + 1).join(", ")}]`,
       phase: "merged",
     };
+  }
+
+  function* sort(l: number, r: number): Generator<VisualizationStep> {
+    if (l >= r) {
+      if (l === r) {
+        yield {
+          array: [...a],
+          highlights: [l],
+          sorted: [...sortedSet],
+          message: `Single element ${a[l]} at index ${l}`,
+          phase: "base",
+        };
+      }
+      return;
+    }
+    const m = Math.floor((l + r) / 2);
+    yield {
+      array: [...a],
+      highlights: Array.from({ length: r - l + 1 }, (_, x) => l + x),
+      sorted: [...sortedSet],
+      message: `Dividing [${l}..${r}] at mid ${m}`,
+      pointers: { L: l, M: m, R: r },
+      phase: "divide",
+    };
+    yield* sort(l, m);
+    yield* sort(m + 1, r);
+    yield* merge(l, m, r);
   }
 
   yield {
@@ -324,11 +349,11 @@ export function* mergeSortSteps(arr: number[]): Generator<VisualizationStep> {
     message: "Starting Merge Sort",
     phase: "init",
   };
-  yield* mergeSort(a, 0, a.length - 1, a);
+  yield* sort(0, n - 1);
   yield {
     array: [...a],
     highlights: [],
-    sorted: Array.from({ length: a.length }, (_, i) => i),
+    sorted: Array.from({ length: n }, (_, i) => i),
     message: "Merge Sort complete!",
     phase: "done",
   };
@@ -336,19 +361,28 @@ export function* mergeSortSteps(arr: number[]): Generator<VisualizationStep> {
 
 export function* quickSortSteps(arr: number[]): Generator<VisualizationStep> {
   const a = [...arr];
+  const n = a.length;
+  const sortedSet = new Set<number>();
 
-  function* quickSort(
-    a: number[],
-    low: number,
-    high: number,
-  ): Generator<VisualizationStep> {
-    if (low >= high) return;
+  function* qs(low: number, high: number): Generator<VisualizationStep> {
+    if (low > high) return;
+    if (low === high) {
+      sortedSet.add(low);
+      yield {
+        array: [...a],
+        highlights: [low],
+        sorted: [...sortedSet],
+        message: `Single element ${a[low]} — already in place`,
+        phase: "base",
+      };
+      return;
+    }
 
     const pivot = a[high];
     yield {
       array: [...a],
       highlights: [high],
-      sorted: [],
+      sorted: [...sortedSet],
       message: `Pivot: ${pivot} (index ${high})`,
       pointers: { pivot: high },
       phase: "pivot",
@@ -359,19 +393,18 @@ export function* quickSortSteps(arr: number[]): Generator<VisualizationStep> {
       yield {
         array: [...a],
         highlights: [j, high],
-        sorted: [],
+        sorted: [...sortedSet],
         message: `Comparing ${a[j]} with pivot ${pivot}`,
-        pointers: { i: i, j: j, pivot: high },
+        pointers: { i, j, pivot: high },
         phase: "compare",
       };
-
       if (a[j] < pivot) {
         i++;
         if (i !== j) {
           yield {
             array: [...a],
             swapping: [i, j],
-            sorted: [],
+            sorted: [...sortedSet],
             message: `Swapping ${a[i]} and ${a[j]}`,
             phase: "swap",
           };
@@ -379,25 +412,28 @@ export function* quickSortSteps(arr: number[]): Generator<VisualizationStep> {
           yield {
             array: [...a],
             highlights: [i, j],
-            sorted: [],
-            message: "Swapped",
+            sorted: [...sortedSet],
+            message: "After swap",
             phase: "after-swap",
           };
         }
       }
     }
-    [a[i + 1], a[high]] = [a[high], a[i + 1]];
     const pi = i + 1;
+    if (pi !== high) {
+      [a[pi], a[high]] = [a[high], a[pi]];
+    }
+    sortedSet.add(pi);
     yield {
       array: [...a],
       highlights: [pi],
-      sorted: [pi],
+      sorted: [...sortedSet],
       message: `Pivot ${pivot} placed at index ${pi}`,
       phase: "pivot-placed",
     };
 
-    yield* quickSort(a, low, pi - 1);
-    yield* quickSort(a, pi + 1, high);
+    yield* qs(low, pi - 1);
+    yield* qs(pi + 1, high);
   }
 
   yield {
@@ -407,100 +443,109 @@ export function* quickSortSteps(arr: number[]): Generator<VisualizationStep> {
     message: "Starting Quick Sort",
     phase: "init",
   };
-  yield* quickSort(a, 0, a.length - 1);
+  yield* qs(0, n - 1);
   yield {
     array: [...a],
     highlights: [],
-    sorted: Array.from({ length: a.length }, (_, i) => i),
+    sorted: Array.from({ length: n }, (_, i) => i),
     message: "Quick Sort complete!",
     phase: "done",
   };
 }
 
-// ============ SEARCHING ============
+// ─── Searching ───────────────────────────────────────────────────────────────
 
 export function* binarySearchSteps(
   arr: number[],
   target?: number,
 ): Generator<VisualizationStep> {
-  const a = [...arr].sort((a, b) => a - b);
+  const a = [...arr].sort((x, y) => x - y);
   const t = target ?? a[Math.floor(Math.random() * a.length)];
+  const allIdx = Array.from({ length: a.length }, (_, i) => i);
 
   yield {
     array: [...a],
     highlights: [],
-    sorted: Array.from({ length: a.length }, (_, i) => i),
-    message: `Binary Search for ${t} in sorted array`,
+    sorted: allIdx,
+    message: `Binary Search for ${t}`,
+    pointers: { left: 0, right: a.length - 1 },
     phase: "init",
   };
 
-  let low = 0,
-    high = a.length - 1;
-  while (low <= high) {
-    const mid = Math.floor((low + high) / 2);
+  let lo = 0,
+    hi = a.length - 1;
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
     yield {
       array: [...a],
       highlights: [mid],
-      sorted: Array.from({ length: a.length }, (_, i) => i),
-      message: `Checking mid=${mid}, value=${a[mid]}`,
-      pointers: { low, mid, high },
+      sorted: allIdx,
+      message: `mid=${mid}, value=${a[mid]}`,
+      pointers: { low: lo, mid, high: hi },
       phase: "check",
     };
-
     if (a[mid] === t) {
       yield {
         array: [...a],
         highlights: [mid],
-        sorted: Array.from({ length: a.length }, (_, i) => i),
+        sorted: allIdx,
         message: `Found ${t} at index ${mid}!`,
         pointers: { found: mid },
         phase: "found",
       };
       return;
-    } else if (a[mid] < t) {
+    }
+    if (a[mid] < t) {
       yield {
         array: [...a],
         highlights: [mid],
-        sorted: Array.from({ length: a.length }, (_, i) => i),
-        message: `${a[mid]} < ${t}, search right half`,
-        pointers: { low: mid + 1, high },
+        sorted: allIdx,
+        message: `${a[mid]} < ${t} — search right half`,
+        pointers: { low: mid + 1, high: hi },
         phase: "go-right",
       };
-      low = mid + 1;
+      lo = mid + 1;
     } else {
       yield {
         array: [...a],
         highlights: [mid],
-        sorted: Array.from({ length: a.length }, (_, i) => i),
-        message: `${a[mid]} > ${t}, search left half`,
-        pointers: { low, high: mid - 1 },
+        sorted: allIdx,
+        message: `${a[mid]} > ${t} — search left half`,
+        pointers: { low: lo, high: mid - 1 },
         phase: "go-left",
       };
-      high = mid - 1;
+      hi = mid - 1;
     }
   }
   yield {
     array: [...a],
     highlights: [],
-    sorted: Array.from({ length: a.length }, (_, i) => i),
-    message: `${t} not found in the array`,
+    sorted: allIdx,
+    message: `${t} not found`,
     phase: "not-found",
   };
 }
 
-// ============ GRAPH (BFS / DFS) ============
+// ─── Graph (BFS / DFS) ──────────────────────────────────────────────────────
+
+function buildAdj(
+  nodes: string[],
+  edges: [string, string, number?][],
+): Record<string, string[]> {
+  const adj: Record<string, string[]> = {};
+  for (const nd of nodes) adj[nd] = [];
+  for (const [u, v] of edges) {
+    if (!adj[u]) adj[u] = [];
+    adj[u].push(v);
+  }
+  return adj;
+}
 
 export function* bfsSteps(
   nodes: string[],
   edges: [string, string, number?][],
 ): Generator<VisualizationStep> {
-  const adj: Record<string, string[]> = {};
-  for (const n of nodes) adj[n] = [];
-  for (const [u, v] of edges) {
-    if (!adj[u]) adj[u] = [];
-    adj[u].push(v);
-  }
-
+  const adj = buildAdj(nodes, edges);
   const visited = new Set<string>();
   const queue = [nodes[0]];
   visited.add(nodes[0]);
@@ -509,7 +554,7 @@ export function* bfsSteps(
     array: [],
     highlights: [],
     sorted: [],
-    message: `Starting BFS from ${nodes[0]}`,
+    message: `BFS from ${nodes[0]}`,
     graphVisited: [],
     graphCurrent: nodes[0],
     graphQueue: [...queue],
@@ -518,32 +563,31 @@ export function* bfsSteps(
   };
 
   while (queue.length > 0) {
-    const current = queue.shift()!;
+    const cur = queue.shift()!;
     yield {
       array: [],
       highlights: [],
       sorted: [],
-      message: `Visiting ${current}`,
-      graphVisited: Array.from(visited),
-      graphCurrent: current,
+      message: `Visiting ${cur}`,
+      graphVisited: [...visited],
+      graphCurrent: cur,
       graphQueue: [...queue],
       graphEdgeHighlight: [],
       phase: "visit",
     };
-
-    for (const neighbor of adj[current] || []) {
-      if (!visited.has(neighbor)) {
-        visited.add(neighbor);
-        queue.push(neighbor);
+    for (const nb of adj[cur] ?? []) {
+      if (!visited.has(nb)) {
+        visited.add(nb);
+        queue.push(nb);
         yield {
           array: [],
           highlights: [],
           sorted: [],
-          message: `Discovered ${neighbor} via ${current}`,
-          graphVisited: Array.from(visited),
-          graphCurrent: current,
+          message: `Discovered ${nb} via ${cur}`,
+          graphVisited: [...visited],
+          graphCurrent: cur,
           graphQueue: [...queue],
-          graphEdgeHighlight: [[current, neighbor]],
+          graphEdgeHighlight: [[cur, nb]],
           phase: "discover",
         };
       }
@@ -553,8 +597,8 @@ export function* bfsSteps(
     array: [],
     highlights: [],
     sorted: [],
-    message: "BFS complete! All reachable nodes visited.",
-    graphVisited: Array.from(visited),
+    message: "BFS complete!",
+    graphVisited: [...visited],
     graphCurrent: "",
     graphQueue: [],
     graphEdgeHighlight: [],
@@ -566,13 +610,7 @@ export function* dfsSteps(
   nodes: string[],
   edges: [string, string, number?][],
 ): Generator<VisualizationStep> {
-  const adj: Record<string, string[]> = {};
-  for (const n of nodes) adj[n] = [];
-  for (const [u, v] of edges) {
-    if (!adj[u]) adj[u] = [];
-    adj[u].push(v);
-  }
-
+  const adj = buildAdj(nodes, edges);
   const visited = new Set<string>();
   const stack = [nodes[0]];
 
@@ -580,7 +618,7 @@ export function* dfsSteps(
     array: [],
     highlights: [],
     sorted: [],
-    message: `Starting DFS from ${nodes[0]}`,
+    message: `DFS from ${nodes[0]}`,
     graphVisited: [],
     graphCurrent: nodes[0],
     graphQueue: [...stack],
@@ -589,35 +627,34 @@ export function* dfsSteps(
   };
 
   while (stack.length > 0) {
-    const current = stack.pop()!;
-    if (visited.has(current)) continue;
-    visited.add(current);
+    const cur = stack.pop()!;
+    if (visited.has(cur)) continue;
+    visited.add(cur);
 
     yield {
       array: [],
       highlights: [],
       sorted: [],
-      message: `Visiting ${current}`,
-      graphVisited: Array.from(visited),
-      graphCurrent: current,
+      message: `Visiting ${cur}`,
+      graphVisited: [...visited],
+      graphCurrent: cur,
       graphQueue: [...stack],
       graphEdgeHighlight: [],
       phase: "visit",
     };
 
-    const neighbors = (adj[current] || []).slice().reverse();
-    for (const neighbor of neighbors) {
-      if (!visited.has(neighbor)) {
-        stack.push(neighbor);
+    for (const nb of (adj[cur] ?? []).slice().reverse()) {
+      if (!visited.has(nb)) {
+        stack.push(nb);
         yield {
           array: [],
           highlights: [],
           sorted: [],
-          message: `Pushing ${neighbor} to stack`,
-          graphVisited: Array.from(visited),
-          graphCurrent: current,
+          message: `Push ${nb} to stack`,
+          graphVisited: [...visited],
+          graphCurrent: cur,
           graphQueue: [...stack],
-          graphEdgeHighlight: [[current, neighbor]],
+          graphEdgeHighlight: [[cur, nb]],
           phase: "push",
         };
       }
@@ -627,8 +664,8 @@ export function* dfsSteps(
     array: [],
     highlights: [],
     sorted: [],
-    message: "DFS complete! All reachable nodes visited.",
-    graphVisited: Array.from(visited),
+    message: "DFS complete!",
+    graphVisited: [...visited],
     graphCurrent: "",
     graphQueue: [],
     graphEdgeHighlight: [],
@@ -636,12 +673,12 @@ export function* dfsSteps(
   };
 }
 
-// ============ TREE TRAVERSALS ============
+// ─── Tree Traversals ─────────────────────────────────────────────────────────
 
 export function* inorderSteps(root: any): Generator<VisualizationStep> {
   const result: number[] = [];
 
-  function* inorder(node: any): Generator<VisualizationStep> {
+  function* walk(node: any): Generator<VisualizationStep> {
     if (!node) return;
     yield {
       array: [],
@@ -651,33 +688,33 @@ export function* inorderSteps(root: any): Generator<VisualizationStep> {
       treeHighlight: [node.value],
       phase: "go-left",
     };
-    yield* inorder(node.left);
+    yield* walk(node.left);
     result.push(node.value);
     yield {
       array: [...result],
       highlights: [],
       sorted: [],
-      message: `Visit ${node.value} → Result: [${result.join(", ")}]`,
+      message: `Visit ${node.value} -> [${result.join(", ")}]`,
       treeHighlight: [node.value],
       phase: "visit",
     };
-    yield* inorder(node.right);
+    yield* walk(node.right);
   }
 
   yield {
     array: [],
     highlights: [],
     sorted: [],
-    message: "Starting Inorder Traversal (Left → Root → Right)",
+    message: "Inorder Traversal (Left, Root, Right)",
     treeHighlight: [],
     phase: "init",
   };
-  yield* inorder(root);
+  yield* walk(root);
   yield {
     array: [...result],
     highlights: [],
     sorted: [],
-    message: `Inorder complete: [${result.join(", ")}]`,
+    message: `Inorder: [${result.join(", ")}]`,
     treeHighlight: [],
     phase: "done",
   };
@@ -686,35 +723,35 @@ export function* inorderSteps(root: any): Generator<VisualizationStep> {
 export function* preorderSteps(root: any): Generator<VisualizationStep> {
   const result: number[] = [];
 
-  function* preorder(node: any): Generator<VisualizationStep> {
+  function* walk(node: any): Generator<VisualizationStep> {
     if (!node) return;
     result.push(node.value);
     yield {
       array: [...result],
       highlights: [],
       sorted: [],
-      message: `Visit ${node.value} → Result: [${result.join(", ")}]`,
+      message: `Visit ${node.value} -> [${result.join(", ")}]`,
       treeHighlight: [node.value],
       phase: "visit",
     };
-    yield* preorder(node.left);
-    yield* preorder(node.right);
+    yield* walk(node.left);
+    yield* walk(node.right);
   }
 
   yield {
     array: [],
     highlights: [],
     sorted: [],
-    message: "Starting Preorder Traversal (Root → Left → Right)",
+    message: "Preorder Traversal (Root, Left, Right)",
     treeHighlight: [],
     phase: "init",
   };
-  yield* preorder(root);
+  yield* walk(root);
   yield {
     array: [...result],
     highlights: [],
     sorted: [],
-    message: `Preorder complete: [${result.join(", ")}]`,
+    message: `Preorder: [${result.join(", ")}]`,
     treeHighlight: [],
     phase: "done",
   };
@@ -723,7 +760,7 @@ export function* preorderSteps(root: any): Generator<VisualizationStep> {
 export function* postorderSteps(root: any): Generator<VisualizationStep> {
   const result: number[] = [];
 
-  function* postorder(node: any): Generator<VisualizationStep> {
+  function* walk(node: any): Generator<VisualizationStep> {
     if (!node) return;
     yield {
       array: [],
@@ -733,14 +770,14 @@ export function* postorderSteps(root: any): Generator<VisualizationStep> {
       treeHighlight: [node.value],
       phase: "go-left",
     };
-    yield* postorder(node.left);
-    yield* postorder(node.right);
+    yield* walk(node.left);
+    yield* walk(node.right);
     result.push(node.value);
     yield {
       array: [...result],
       highlights: [],
       sorted: [],
-      message: `Visit ${node.value} → Result: [${result.join(", ")}]`,
+      message: `Visit ${node.value} -> [${result.join(", ")}]`,
       treeHighlight: [node.value],
       phase: "visit",
     };
@@ -750,22 +787,22 @@ export function* postorderSteps(root: any): Generator<VisualizationStep> {
     array: [],
     highlights: [],
     sorted: [],
-    message: "Starting Postorder Traversal (Left → Right → Root)",
+    message: "Postorder Traversal (Left, Right, Root)",
     treeHighlight: [],
     phase: "init",
   };
-  yield* postorder(root);
+  yield* walk(root);
   yield {
     array: [...result],
     highlights: [],
     sorted: [],
-    message: `Postorder complete: [${result.join(", ")}]`,
+    message: `Postorder: [${result.join(", ")}]`,
     treeHighlight: [],
     phase: "done",
   };
 }
 
-// ============ DP ============
+// ─── Dynamic Programming ─────────────────────────────────────────────────────
 
 export function* dpFibonacciSteps(n?: number): Generator<VisualizationStep> {
   const N = n ?? 10;
@@ -776,7 +813,7 @@ export function* dpFibonacciSteps(n?: number): Generator<VisualizationStep> {
     array: [...dp],
     highlights: [0, 1],
     sorted: [],
-    message: `Computing Fibonacci(${N}). Base: F(0)=0, F(1)=1`,
+    message: `Fibonacci(${N}) — base: F(0)=0, F(1)=1`,
     phase: "init",
   };
 
@@ -814,11 +851,14 @@ export function* dpCoinChangeSteps(): Generator<VisualizationStep> {
   const dp = new Array(amount + 1).fill(Infinity);
   dp[0] = 0;
 
+  const display = (v: number) => (v === Infinity ? -1 : v);
+  const label = (v: number) => (v === Infinity ? "INF" : String(v));
+
   yield {
-    array: [...dp.map((v) => (v === Infinity ? -1 : v))],
+    array: dp.map(display),
     highlights: [0],
     sorted: [],
-    message: `Coin Change: coins=[${coins}], amount=${amount}. dp[0]=0`,
+    message: `Coin Change: coins=[${coins}], amount=${amount}`,
     phase: "init",
   };
 
@@ -826,15 +866,15 @@ export function* dpCoinChangeSteps(): Generator<VisualizationStep> {
     for (let i = coin; i <= amount; i++) {
       const prev = dp[i];
       yield {
-        array: [...dp.map((v) => (v === Infinity ? -1 : v))],
+        array: dp.map(display),
         highlights: [i, i - coin],
         sorted: [],
-        message: `Trying coin ${coin}: dp[${i}] = min(dp[${i}], dp[${i - coin}]+1) = min(${prev === Infinity ? "∞" : prev}, ${dp[i - coin] === Infinity ? "∞" : dp[i - coin] + 1})`,
+        message: `Coin ${coin}: dp[${i}] = min(${label(prev)}, ${label(dp[i - coin])}+1)`,
         phase: "try",
       };
       dp[i] = Math.min(dp[i], dp[i - coin] + 1);
       yield {
-        array: [...dp.map((v) => (v === Infinity ? -1 : v))],
+        array: dp.map(display),
         highlights: [i],
         sorted: [],
         message: `dp[${i}] = ${dp[i]}`,
@@ -844,15 +884,15 @@ export function* dpCoinChangeSteps(): Generator<VisualizationStep> {
   }
 
   yield {
-    array: [...dp.map((v) => (v === Infinity ? -1 : v))],
+    array: dp.map(display),
     highlights: [amount],
     sorted: Array.from({ length: amount + 1 }, (_, i) => i),
-    message: `Minimum coins for ${amount} = ${dp[amount]}`,
+    message: `Min coins for ${amount} = ${dp[amount]}`,
     phase: "done",
   };
 }
 
-// ============ LINKED LIST ============
+// ─── Linked List ─────────────────────────────────────────────────────────────
 
 export function* linkedListReverseSteps(): Generator<VisualizationStep> {
   const values = [1, 2, 3, 4, 5];
@@ -865,8 +905,8 @@ export function* linkedListReverseSteps(): Generator<VisualizationStep> {
     array: [],
     highlights: [],
     sorted: [],
-    message: "Reversing Linked List: 1→2→3→4→5",
-    linkedList: list.map((n) => ({ ...n })),
+    message: "Reversing linked list: 1->2->3->4->5",
+    linkedList: list.map((nd) => ({ ...nd })),
     llHighlight: -1,
     phase: "init",
   };
@@ -879,25 +919,23 @@ export function* linkedListReverseSteps(): Generator<VisualizationStep> {
       array: [],
       highlights: [],
       sorted: [],
-      message: `Current: ${values[curr]}, Prev: ${prev >= 0 ? values[prev] : "null"}`,
-      linkedList: list.map((n) => ({ ...n })),
+      message: `curr=${values[curr]}, prev=${prev >= 0 ? values[prev] : "null"}`,
+      linkedList: list.map((nd) => ({ ...nd })),
       llHighlight: curr,
       llPointers: { prev, curr, next: curr + 1 },
       phase: "step",
     };
 
-    const next = curr + 1;
-    // Reverse the link
     list[curr].next = prev >= 0;
     prev = curr;
-    curr = next;
+    curr = curr + 1;
 
     yield {
       array: [],
       highlights: [],
       sorted: [],
-      message: `Reversed link. Moving forward.`,
-      linkedList: list.map((n) => ({ ...n })),
+      message: "Reversed link — moving forward",
+      linkedList: list.map((nd) => ({ ...nd })),
       llHighlight: prev,
       phase: "reversed",
     };
@@ -907,21 +945,21 @@ export function* linkedListReverseSteps(): Generator<VisualizationStep> {
     array: [],
     highlights: [],
     sorted: [],
-    message: "Linked List reversed: 5→4→3→2→1",
-    linkedList: list.map((n) => ({ ...n })).reverse(),
+    message: "Reversed: 5->4->3->2->1",
+    linkedList: list.map((nd) => ({ ...nd })).reverse(),
     llHighlight: -1,
     phase: "done",
   };
 }
 
-// ============ STACK ============
+// ─── Stack ───────────────────────────────────────────────────────────────────
 
 export function* stackSteps(): Generator<VisualizationStep> {
   const ops = ["push 10", "push 20", "push 30", "pop", "push 40", "pop", "pop"];
   const stack: number[] = [];
 
   yield {
-    array: [...stack],
+    array: [],
     highlights: [],
     sorted: [],
     message: "Stack Operations (LIFO)",
@@ -936,7 +974,7 @@ export function* stackSteps(): Generator<VisualizationStep> {
         array: [...stack],
         highlights: [stack.length - 1],
         sorted: [],
-        message: `Push ${val} → Stack: [${stack.join(", ")}]`,
+        message: `Push ${val} -> [${stack.join(", ")}]`,
         phase: "push",
       };
     } else {
@@ -945,7 +983,7 @@ export function* stackSteps(): Generator<VisualizationStep> {
         array: [...stack],
         highlights: stack.length > 0 ? [stack.length - 1] : [],
         sorted: [],
-        message: `Pop ${val} → Stack: [${stack.join(", ")}]`,
+        message: `Pop ${val} -> [${stack.join(", ")}]`,
         phase: "pop",
       };
     }
@@ -959,17 +997,18 @@ export function* stackSteps(): Generator<VisualizationStep> {
   };
 }
 
-// ============ TWO POINTERS ============
+// ─── Two Pointers ────────────────────────────────────────────────────────────
 
 export function* twoPointersSteps(arr: number[]): Generator<VisualizationStep> {
-  const a = [...arr].sort((a, b) => a - b);
-  const target = a[2] + a[a.length - 2]; // ensure a valid target
+  const a = [...arr].sort((x, y) => x - y);
+  const target = a[2] + a[a.length - 2];
+  const allIdx = Array.from({ length: a.length }, (_, i) => i);
 
   yield {
     array: [...a],
     highlights: [],
-    sorted: Array.from({ length: a.length }, (_, i) => i),
-    message: `Two Sum on sorted array, target = ${target}`,
+    sorted: allIdx,
+    message: `Two-pointer sum, target=${target}`,
     pointers: { left: 0, right: a.length - 1 },
     phase: "init",
   };
@@ -981,29 +1020,29 @@ export function* twoPointersSteps(arr: number[]): Generator<VisualizationStep> {
     yield {
       array: [...a],
       highlights: [left, right],
-      sorted: Array.from({ length: a.length }, (_, i) => i),
-      message: `${a[left]} + ${a[right]} = ${sum} (target: ${target})`,
+      sorted: allIdx,
+      message: `${a[left]}+${a[right]}=${sum} (target ${target})`,
       pointers: { left, right },
       phase: "check",
     };
-
     if (sum === target) {
       yield {
         array: [...a],
         highlights: [left, right],
-        sorted: Array.from({ length: a.length }, (_, i) => i),
-        message: `Found! ${a[left]} + ${a[right]} = ${target}`,
+        sorted: allIdx,
+        message: `Found! ${a[left]}+${a[right]}=${target}`,
         pointers: { left, right },
         phase: "found",
       };
       return;
-    } else if (sum < target) {
+    }
+    if (sum < target) {
       left++;
       yield {
         array: [...a],
         highlights: [left, right],
-        sorted: Array.from({ length: a.length }, (_, i) => i),
-        message: `Sum too small, move left pointer right`,
+        sorted: allIdx,
+        message: "Sum too small — move left pointer right",
         pointers: { left, right },
         phase: "move-left",
       };
@@ -1012,8 +1051,8 @@ export function* twoPointersSteps(arr: number[]): Generator<VisualizationStep> {
       yield {
         array: [...a],
         highlights: [left, right],
-        sorted: Array.from({ length: a.length }, (_, i) => i),
-        message: `Sum too large, move right pointer left`,
+        sorted: allIdx,
+        message: "Sum too large — move right pointer left",
         pointers: { left, right },
         phase: "move-right",
       };
@@ -1021,7 +1060,7 @@ export function* twoPointersSteps(arr: number[]): Generator<VisualizationStep> {
   }
 }
 
-// ============ SLIDING WINDOW ============
+// ─── Sliding Window ──────────────────────────────────────────────────────────
 
 export function* slidingWindowSteps(
   arr: number[],
@@ -1033,7 +1072,7 @@ export function* slidingWindowSteps(
     array: [...a],
     highlights: [],
     sorted: [],
-    message: `Max sum subarray of size ${k}`,
+    message: `Max-sum subarray of size ${k}`,
     phase: "init",
   };
 
@@ -1047,7 +1086,7 @@ export function* slidingWindowSteps(
       array: [...a],
       highlights: Array.from({ length: i + 1 }, (_, j) => j),
       sorted: [],
-      message: `Building initial window: sum = ${windowSum}`,
+      message: `Building window: sum=${windowSum}`,
       phase: "build",
     };
   }
@@ -1055,22 +1094,21 @@ export function* slidingWindowSteps(
 
   for (let i = k; i < a.length; i++) {
     windowSum += a[i] - a[i - k];
-    const windowIndices = Array.from({ length: k }, (_, j) => i - k + 1 + j);
+    const win = Array.from({ length: k }, (_, j) => i - k + 1 + j);
     yield {
       array: [...a],
-      highlights: windowIndices,
+      highlights: win,
       sorted: [],
       message: `Window [${a.slice(i - k + 1, i + 1).join(",")}] sum=${windowSum}, max=${maxSum}`,
       pointers: { start: i - k + 1, end: i },
       phase: "slide",
     };
-
     if (windowSum > maxSum) {
       maxSum = windowSum;
       maxStart = i - k + 1;
       yield {
         array: [...a],
-        highlights: windowIndices,
+        highlights: win,
         sorted: [],
         message: `New max! sum=${maxSum}`,
         phase: "new-max",
@@ -1078,12 +1116,11 @@ export function* slidingWindowSteps(
     }
   }
 
-  const finalIndices = Array.from({ length: k }, (_, j) => maxStart + j);
   yield {
     array: [...a],
-    highlights: finalIndices,
+    highlights: Array.from({ length: k }, (_, j) => maxStart + j),
     sorted: [],
-    message: `Max sum = ${maxSum} at indices [${maxStart}..${maxStart + k - 1}]`,
+    message: `Max sum=${maxSum} at [${maxStart}..${maxStart + k - 1}]`,
     phase: "done",
   };
 }

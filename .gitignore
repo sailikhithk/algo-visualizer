@@ -29,6 +29,11 @@ vite.config.ts.*
 *.log
 npm-debug.log*
 
+# SQLite database
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
 # Archives
 *.tar.gz
 

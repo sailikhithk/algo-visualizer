@@ -3,6 +3,13 @@ import { createServer, type Server } from "http";
 import Anthropic from "@anthropic-ai/sdk";
 import { MODEL_CONFIG, TOKEN_LIMITS } from "./ai-config";
 import { TUTOR_SYSTEM_PROMPT, VISUALIZER_SYSTEM_PROMPT } from "./prompts";
+import {
+  listSavedCodes,
+  getSavedCode,
+  createSavedCode,
+  updateSavedCode,
+  deleteSavedCode,
+} from "./storage";
 
 // Lazy-init: don't create at import time (dotenv may not have loaded yet)
 let _client: Anthropic | null = null;
@@ -131,6 +138,89 @@ Analyze this code and provide a comprehensive teaching explanation.`;
         error: "Failed to generate visualization",
         details: error.message,
       });
+    }
+  });
+
+  // ============ Saved Codes CRUD ============
+
+  // List all saved codes
+  app.get("/api/saved-codes", (_req: Request, res: Response) => {
+    try {
+      const codes = listSavedCodes();
+      return res.json({ codes });
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get a single saved code
+  app.get("/api/saved-codes/:id", (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id as string, 10);
+      if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+      const code = getSavedCode(id);
+      if (!code) return res.status(404).json({ error: "Not found" });
+      return res.json({ code });
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Create a saved code
+  app.post("/api/saved-codes", (req: Request, res: Response) => {
+    try {
+      const { title, code, algorithmType } = req.body;
+      if (!title || !code)
+        return res.status(400).json({ error: "Title and code are required" });
+      if (typeof title !== "string" || title.length > 200)
+        return res
+          .status(400)
+          .json({ error: "Title must be a string under 200 chars" });
+      if (typeof code !== "string" || code.length > 50000)
+        return res
+          .status(400)
+          .json({ error: "Code must be a string under 50k chars" });
+      const saved = createSavedCode(title, code, algorithmType);
+      return res.status(201).json({ code: saved });
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Update a saved code
+  app.put("/api/saved-codes/:id", (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id as string, 10);
+      if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+      const { title, code, algorithmType } = req.body;
+      if (!title || !code)
+        return res.status(400).json({ error: "Title and code are required" });
+      if (typeof title !== "string" || title.length > 200)
+        return res
+          .status(400)
+          .json({ error: "Title must be a string under 200 chars" });
+      if (typeof code !== "string" || code.length > 50000)
+        return res
+          .status(400)
+          .json({ error: "Code must be a string under 50k chars" });
+      const updated = updateSavedCode(id, title, code, algorithmType);
+      if (!updated) return res.status(404).json({ error: "Not found" });
+      return res.json({ code: updated });
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Delete a saved code
+  app.delete("/api/saved-codes/:id", (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id as string, 10);
+      if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+      const deleted = deleteSavedCode(id);
+      if (!deleted) return res.status(404).json({ error: "Not found" });
+      return res.json({ success: true });
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message });
     }
   });
 

@@ -1,5 +1,15 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { BarChart3, Loader2 } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+
+export interface SavedCode {
+  id: number;
+  title: string;
+  code: string;
+  algorithm_type: string | null;
+  created_at: string;
+  updated_at: string;
+}
 import {
   detectAlgorithm,
   extractArrayFromCode,
@@ -41,7 +51,6 @@ import {
   TutorPanel,
   type TutorExplanation,
 } from "@/components/editorial/TutorPanel";
-import { apiRequest } from "@/lib/queryClient";
 
 import { Header } from "@/components/Header";
 import { CodeEditor } from "@/components/CodeEditor";
@@ -50,19 +59,6 @@ import { AlgorithmInfo } from "@/components/AlgorithmInfo";
 import { VisualizationPanel } from "@/components/VisualizationPanel";
 
 const DEFAULT_CODE = SAMPLE_CODES.bubble_sort.code;
-
-// Algorithm types that delegate to AI visualization instead of built-in generators
-const AI_VIZ_TYPES = new Set([
-  "median_two_sorted",
-  "trapping_rain_water",
-  "longest_palindrome",
-  "word_break",
-  "regex_match",
-  "wildcard_match",
-  "next_permutation",
-  "rotate_image",
-  "unknown",
-]);
 
 export default function Home() {
   const [code, setCode] = useState(DEFAULT_CODE);
@@ -98,8 +94,34 @@ export default function Home() {
   const [aiVizLoading, setAiVizLoading] = useState(false);
   const [aiVizError, setAiVizError] = useState<string | null>(null);
 
+  // Saved codes state
+  const [savedCodes, setSavedCodes] = useState<SavedCode[]>([]);
+
+  // Fetch saved codes on mount
+  useEffect(() => {
+    apiRequest("GET", "/api/saved-codes")
+      .then((res) => res.json())
+      .then((data) => setSavedCodes(data.codes ?? []))
+      .catch(() => {});
+  }, []);
+
+  const handleSave = useCallback(() => {
+    const title = window.prompt("Name this snippet:", "");
+    if (!title) return;
+    apiRequest("POST", "/api/saved-codes", {
+      title,
+      code,
+      algorithmType: detected?.type ?? null,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.code) setSavedCodes((prev) => [data.code, ...prev]);
+      })
+      .catch(() => {});
+  }, [code, detected]);
+
   const generateSteps = useCallback(
-    (alg: DetectedAlgorithm, sourceCode: string) => {
+    (alg: DetectedAlgorithm, sourceCode: string): boolean => {
       const arr = extractArrayFromCode(sourceCode);
       const graph = extractGraphFromCode(sourceCode);
       const tree = extractTreeFromCode(sourceCode);
@@ -169,18 +191,34 @@ export default function Home() {
           generator = slidingWindowSteps(arr);
           break;
         default:
-          if (AI_VIZ_TYPES.has(alg.type)) return;
-          generator = bubbleSortSteps(arr);
-          break;
+          // No built-in generator for this algorithm — delegate to AI
+          return false;
       }
 
       const allSteps = Array.from(generator);
       setSteps(allSteps);
       setCurrentStep(0);
       setIsPlaying(false);
+      return true;
     },
     [],
   );
+
+  const handleLoadSaved = useCallback(
+    (saved: SavedCode) => {
+      setCode(saved.code);
+      const alg = detectAlgorithm(saved.code);
+      setDetected(alg);
+      generateSteps(alg, saved.code);
+    },
+    [generateSteps],
+  );
+
+  const handleDeleteSaved = useCallback((id: number) => {
+    apiRequest("DELETE", `/api/saved-codes/${id}`)
+      .then(() => setSavedCodes((prev) => prev.filter((c) => c.id !== id)))
+      .catch(() => {});
+  }, []);
 
   const fetchTutorExplanation = useCallback(
     async (sourceCode: string, alg: DetectedAlgorithm) => {
@@ -238,8 +276,8 @@ export default function Home() {
     setDetected(alg);
     setAiVizResult(null);
     setAiVizError(null);
-    generateSteps(alg, code);
-    if (AI_VIZ_TYPES.has(alg.type)) {
+    const handled = generateSteps(alg, code);
+    if (!handled) {
       handleAIVisualize(code);
     }
   }, [code, generateSteps, handleAIVisualize]);
@@ -249,9 +287,9 @@ export default function Home() {
     setDetected(alg);
     setAiVizResult(null);
     setAiVizError(null);
-    generateSteps(alg, code);
+    const handled = generateSteps(alg, code);
     fetchTutorExplanation(code, alg);
-    if (AI_VIZ_TYPES.has(alg.type)) {
+    if (!handled) {
       handleAIVisualize(code);
     }
   }, [code, generateSteps, fetchTutorExplanation, handleAIVisualize]);
@@ -352,7 +390,12 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
-      <Header onSelectTemplate={loadSample} />
+      <Header
+        onSelectTemplate={loadSample}
+        savedCodes={savedCodes}
+        onLoadSaved={handleLoadSaved}
+        onDeleteSaved={handleDeleteSaved}
+      />
 
       <main className="flex-1 min-h-0 overflow-y-auto">
         <div className="flex flex-col min-h-full">
@@ -365,6 +408,7 @@ export default function Home() {
                 onVisualize={handleVisualize}
                 onAIVisualize={() => handleAIVisualize(code)}
                 onLearn={handleVisualizeAndLearn}
+                onSave={handleSave}
                 aiVizLoading={aiVizLoading}
                 tutorLoading={tutorLoading}
               />

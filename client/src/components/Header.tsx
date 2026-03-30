@@ -2,11 +2,23 @@ import { useState, useRef, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
-import { Sun, Moon, Monitor, ChevronDown, Code2 } from "lucide-react";
+import {
+  Sun,
+  Moon,
+  Monitor,
+  ChevronDown,
+  Code2,
+  Bookmark,
+  Trash2,
+} from "lucide-react";
 import { SAMPLE_CODES, CATEGORY_SAMPLES } from "@/lib/sampleCode";
+import type { SavedCode } from "@/pages/home";
 
 interface HeaderProps {
   onSelectTemplate?: (key: string) => void;
+  savedCodes?: SavedCode[];
+  onLoadSaved?: (saved: SavedCode) => void;
+  onDeleteSaved?: (id: number) => void;
 }
 
 /*
@@ -47,10 +59,17 @@ const MENU_COLUMNS: { category: string; keys: string[] }[][] = [
   ],
 ];
 
-export function Header({ onSelectTemplate }: HeaderProps) {
+export function Header({
+  onSelectTemplate,
+  savedCodes = [],
+  onLoadSaved,
+  onDeleteSaved,
+}: HeaderProps) {
   const { theme, setTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [savedOpen, setSavedOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const savedRef = useRef<HTMLDivElement>(null);
 
   const cycleTheme = () => {
     const next =
@@ -76,13 +95,28 @@ export function Header({ onSelectTemplate }: HeaderProps) {
 
   // Close on Escape
   useEffect(() => {
-    if (!menuOpen) return;
+    if (!menuOpen && !savedOpen) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMenuOpen(false);
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        setSavedOpen(false);
+      }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [menuOpen]);
+  }, [menuOpen, savedOpen]);
+
+  // Close saved-codes dropdown on click outside
+  useEffect(() => {
+    if (!savedOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (savedRef.current && !savedRef.current.contains(e.target as Node)) {
+        setSavedOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [savedOpen]);
 
   const handleSelect = (key: string) => {
     onSelectTemplate?.(key);
@@ -128,70 +162,162 @@ export function Header({ onSelectTemplate }: HeaderProps) {
           </div>
         </div>
 
-        {/* Center: Algorithms mega-menu trigger */}
-        <div className="relative" ref={menuRef}>
-          <button
-            onClick={() => setMenuOpen((o) => !o)}
-            className={`
-              flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
-              transition-colors
-              ${
-                menuOpen
-                  ? "bg-primary/15 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-              }
-            `}
-          >
-            <Code2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Algorithms</span>
-            <ChevronDown
-              className={`w-3.5 h-3.5 transition-transform ${menuOpen ? "rotate-180" : ""}`}
-            />
-          </button>
-
-          {/* Mega-menu panel */}
-          {menuOpen && (
-            <div
-              className="
-                absolute left-1/2 -translate-x-1/2 top-full mt-2
-                w-[min(90vw,560px)]
-                bg-card border border-border/60 rounded-xl
-                shadow-[var(--shadow-lg)]
-                p-4 sm:p-5
-                animate-in fade-in-0 zoom-in-95 duration-150
-              "
+        {/* Center: Algorithms mega-menu trigger + Saved Codes */}
+        <div className="flex items-center gap-1">
+          {/* Algorithms mega-menu */}
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => {
+                setMenuOpen((o) => !o);
+                setSavedOpen(false);
+              }}
+              className={`
+                flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
+                transition-colors
+                ${
+                  menuOpen
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                }
+              `}
             >
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
-                {MENU_COLUMNS.map((column, ci) => (
-                  <div key={ci} className="flex flex-col gap-3">
-                    {column.map(({ category, keys }) => (
-                      <div key={category}>
-                        <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                          {category}
-                        </h3>
-                        <ul className="space-y-0.5">
-                          {keys.map((key) => (
-                            <li key={key}>
-                              <button
-                                onClick={() => handleSelect(key)}
-                                className="
-                                  w-full text-left text-[13px] px-2 py-1 rounded-md
-                                  text-foreground/80 hover:text-primary hover:bg-primary/10
-                                  transition-colors
-                                "
-                              >
-                                {SAMPLE_CODES[key]?.title ?? key}
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                ))}
+              <Code2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Algorithms</span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform ${menuOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {/* Mega-menu panel */}
+            {menuOpen && (
+              <div
+                className="
+                  absolute left-1/2 -translate-x-1/2 top-full mt-2
+                  w-[min(90vw,560px)]
+                  bg-card border border-border/60 rounded-xl
+                  shadow-[var(--shadow-lg)]
+                  p-4 sm:p-5
+                  animate-in fade-in-0 zoom-in-95 duration-150
+                "
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+                  {MENU_COLUMNS.map((column, ci) => (
+                    <div key={ci} className="flex flex-col gap-3">
+                      {column.map(({ category, keys }) => (
+                        <div key={category}>
+                          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                            {category}
+                          </h3>
+                          <ul className="space-y-0.5">
+                            {keys.map((key) => (
+                              <li key={key}>
+                                <button
+                                  onClick={() => handleSelect(key)}
+                                  className="
+                                    w-full text-left text-[13px] px-2 py-1 rounded-md
+                                    text-foreground/80 hover:text-primary hover:bg-primary/10
+                                    transition-colors
+                                  "
+                                >
+                                  {SAMPLE_CODES[key]?.title ?? key}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+
+          {/* Saved Codes dropdown */}
+          <div className="relative" ref={savedRef}>
+            <button
+              onClick={() => {
+                setSavedOpen((o) => !o);
+                setMenuOpen(false);
+              }}
+              className={`
+                flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
+                transition-colors
+                ${
+                  savedOpen
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                }
+              `}
+            >
+              <Bookmark className="w-4 h-4" />
+              <span className="hidden sm:inline">Saved</span>
+              {savedCodes.length > 0 && (
+                <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-semibold">
+                  {savedCodes.length}
+                </span>
+              )}
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform ${savedOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {savedOpen && (
+              <div
+                className="
+                  absolute left-1/2 -translate-x-1/2 top-full mt-2
+                  w-[min(90vw,280px)]
+                  bg-card border border-border/60 rounded-xl
+                  shadow-[var(--shadow-lg)]
+                  p-3
+                  animate-in fade-in-0 zoom-in-95 duration-150
+                  max-h-80 overflow-y-auto
+                "
+              >
+                {savedCodes.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-4">
+                    No saved snippets yet.
+                    <br />
+                    Use the Save button in the editor.
+                  </p>
+                ) : (
+                  <ul className="space-y-1">
+                    {savedCodes.map((sc) => (
+                      <li
+                        key={sc.id}
+                        className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-md hover:bg-muted/60 transition-colors group"
+                      >
+                        <button
+                          onClick={() => {
+                            onLoadSaved?.(sc);
+                            setSavedOpen(false);
+                          }}
+                          className="text-left flex-1 min-w-0"
+                        >
+                          <span className="text-[13px] text-foreground/80 hover:text-primary block truncate">
+                            {sc.title}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(sc.created_at).toLocaleDateString()}
+                          </span>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteSaved?.(sc.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/20 hover:text-destructive transition-all"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right: Badge + Theme toggle */}

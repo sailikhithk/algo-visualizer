@@ -126,8 +126,10 @@ Return EXACTLY this JSON (no markdown, no code fences, pure JSON):
       "phase": "init|compare|partition|found|eliminate|done|...",
       "array": [/* primary array state, numbers only */],
       "array2": [/* secondary array if applicable */],
-      "highlights": [/* 0-based indices in array to highlight teal */],
+      "highlights": [/* 0-based indices in array being compared/active — shown in teal */],
       "highlights2": [/* 0-based indices in array2 to highlight */],
+      "swapping": [/* 0-based indices being swapped/moved — shown in RED for emphasis */],
+      "sorted": [/* indices that are finalized/in correct position — shown in GREEN */],
       "pointers": { "name": index },
       "pointers2": { "name": index },
       "partition1": /* integer: visual split point in array (index where LEFT ends) */,
@@ -141,7 +143,12 @@ Return EXACTLY this JSON (no markdown, no code fences, pure JSON):
 RULES:
 - Extract actual array values from the code (look for list assignments like nums1=[1,3], nums2=[2] etc.)
 - If no arrays in code, use small representative examples (4-8 elements)
-- Generate 8-25 steps that clearly show the algorithm's key decisions
+- Generate 12-30 steps that clearly show the algorithm's key decisions
+- Use "highlights" for indices being compared (shown teal/blue)
+- Use "swapping" for indices being swapped or moved (shown RED) — this creates the animated swap effect
+- Use "sorted" to progressively mark indices that are in their final position (shown GREEN)
+- Every step that moves or swaps elements MUST include the "swapping" field
+- Progressively add indices to "sorted" as elements reach their final position
 - For binary search on two arrays (like Median of Two Sorted Arrays): show both arrays, partition pointers, and key variable comparisons at each iteration
 - For divide and conquer: show the subproblems shrinking
 - For DP: show the dp table filling up (use dpTable field if table-based)
