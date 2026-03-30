@@ -44,7 +44,6 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 
 import { Header } from "@/components/Header";
-import { TemplatePicker } from "@/components/TemplatePicker";
 import { CodeEditor } from "@/components/CodeEditor";
 import { PlaybackControls } from "@/components/PlaybackControls";
 import { AlgorithmInfo } from "@/components/AlgorithmInfo";
@@ -353,14 +352,13 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
-      <Header />
+      <Header onSelectTemplate={loadSample} />
 
       <main className="flex-1 min-h-0 overflow-y-auto">
         <div className="flex flex-col min-h-full">
           <div className="flex-1 min-h-[70vh] grid grid-cols-1 lg:grid-cols-12 gap-3 p-3 sm:p-4">
-            {/* LEFT: Code Editor + Samples */}
+            {/* LEFT: Code Editor */}
             <div className="lg:col-span-5 flex flex-col gap-3 order-2 lg:order-1 min-h-0">
-              <TemplatePicker onSelect={loadSample} />
               <CodeEditor
                 code={code}
                 onChange={setCode}

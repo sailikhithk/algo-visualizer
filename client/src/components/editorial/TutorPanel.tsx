@@ -104,7 +104,7 @@ function CollapsibleSection({
   icon: Icon,
   children,
   defaultOpen = true,
-  accentColor = "hsl(168,80%,48%)",
+  accentColor = "hsl(var(--ed-teal))",
   badge,
 }: {
   title: string;
@@ -227,14 +227,14 @@ export function TutorPanel({
             <CollapsibleSection
               title="Pattern Recognition"
               icon={Target}
-              accentColor="hsl(330,80%,60%)"
+              accentColor="hsl(var(--ed-pink))"
             >
               <div className="space-y-3">
-                <div className="rounded-lg bg-[hsl(330,80%,60%/0.06)] border border-[hsl(330,80%,60%/0.15)] p-3">
+                <div className="rounded-lg bg-[hsl(var(--ed-pink)/0.06)] border border-[hsl(var(--ed-pink)/0.15)] p-3">
                   <div className="flex items-center gap-2 mb-2">
                     <Badge
                       variant="outline"
-                      className="text-[9px] bg-[hsl(330,80%,60%/0.1)] text-[hsl(330,80%,60%)] border-[hsl(330,80%,60%/0.2)] px-1.5 py-0"
+                      className="text-[9px] bg-[hsl(var(--ed-pink)/0.1)] text-[hsl(var(--ed-pink))] border-[hsl(var(--ed-pink)/0.2)] px-1.5 py-0"
                     >
                       Pattern
                     </Badge>
@@ -251,7 +251,7 @@ export function TutorPanel({
                     </span>
                     {explanation.patternRecognition.signals.map((signal, i) => (
                       <div key={i} className="flex gap-2 items-start">
-                        <div className="w-1 h-1 rounded-full bg-[hsl(330,80%,60%)] mt-1.5 flex-shrink-0" />
+                        <div className="w-1 h-1 rounded-full bg-[hsl(var(--ed-pink))] mt-1.5 flex-shrink-0" />
                         <p className="text-[11px] text-foreground/80">
                           {signal}
                         </p>
@@ -269,7 +269,7 @@ export function TutorPanel({
               <CollapsibleSection
                 title="How to Think About It"
                 icon={Route}
-                accentColor="hsl(200,80%,55%)"
+                accentColor="hsl(var(--ed-blue))"
                 badge="Key Section"
               >
                 <div className="space-y-3">
@@ -278,10 +278,10 @@ export function TutorPanel({
                       key={i}
                       className="rounded-lg border border-border/40 overflow-hidden"
                     >
-                      <div className="bg-[hsl(200,80%,55%/0.06)] px-3 py-2 border-b border-border/30">
+                      <div className="bg-[hsl(var(--ed-blue)/0.06)] px-3 py-2 border-b border-border/30">
                         <div className="flex items-start gap-2">
-                          <div className="w-5 h-5 rounded-full bg-[hsl(200,80%,55%/0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <span className="text-[9px] font-bold text-[hsl(200,80%,55%)]">
+                          <div className="w-5 h-5 rounded-full bg-[hsl(var(--ed-blue)/0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-[9px] font-bold text-[hsl(var(--ed-blue))]">
                               {i + 1}
                             </span>
                           </div>
@@ -294,7 +294,7 @@ export function TutorPanel({
                         <p className="text-[11px] text-foreground/70 leading-relaxed">
                           {step.reasoning}
                         </p>
-                        <p className="text-[11px] text-[hsl(168,80%,48%)] font-medium">
+                        <p className="text-[11px] text-[hsl(var(--ed-teal))] font-medium">
                           → {step.conclusion}
                         </p>
                       </div>
@@ -308,10 +308,10 @@ export function TutorPanel({
           <CollapsibleSection
             title="Real-World Analogy"
             icon={Globe}
-            accentColor="hsl(168,80%,48%)"
+            accentColor="hsl(var(--ed-teal))"
           >
-            <div className="rounded-lg bg-[hsl(168,80%,48%/0.06)] border border-[hsl(168,80%,48%/0.15)] p-3">
-              <p className="text-xs font-semibold text-[hsl(168,80%,48%)] mb-1.5">
+            <div className="rounded-lg bg-[hsl(var(--ed-teal)/0.06)] border border-[hsl(var(--ed-teal)/0.15)] p-3">
+              <p className="text-xs font-semibold text-[hsl(var(--ed-teal))] mb-1.5">
                 {explanation.realWorldAnalogy.title}
               </p>
               <p className="text-xs text-foreground/80 leading-relaxed">
@@ -324,20 +324,20 @@ export function TutorPanel({
           <CollapsibleSection
             title="Build Your Intuition"
             icon={Lightbulb}
-            accentColor="hsl(45,90%,60%)"
+            accentColor="hsl(var(--ed-amber))"
           >
             <div className="space-y-3">
-              <div className="rounded-lg bg-[hsl(45,90%,60%/0.06)] border border-[hsl(45,90%,60%/0.15)] p-3">
+              <div className="rounded-lg bg-[hsl(var(--ed-amber)/0.06)] border border-[hsl(var(--ed-amber)/0.15)] p-3">
                 <div className="flex items-start gap-2">
-                  <MessageCircle className="w-3 h-3 text-[hsl(45,90%,60%)] mt-0.5 flex-shrink-0" />
+                  <MessageCircle className="w-3 h-3 text-[hsl(var(--ed-amber))] mt-0.5 flex-shrink-0" />
                   <p className="text-xs text-foreground/80 leading-relaxed italic">
                     {explanation.intuitionBuilder.question}
                   </p>
                 </div>
               </div>
-              <div className="rounded-lg bg-[hsl(168,80%,48%/0.06)] border border-[hsl(168,80%,48%/0.15)] p-3">
+              <div className="rounded-lg bg-[hsl(var(--ed-teal)/0.06)] border border-[hsl(var(--ed-teal)/0.15)] p-3">
                 <div className="flex items-start gap-2">
-                  <Brain className="w-3 h-3 text-[hsl(168,80%,48%)] mt-0.5 flex-shrink-0" />
+                  <Brain className="w-3 h-3 text-[hsl(var(--ed-teal))] mt-0.5 flex-shrink-0" />
                   <p className="text-xs text-foreground leading-relaxed font-medium">
                     {explanation.intuitionBuilder.insight}
                   </p>
@@ -350,13 +350,13 @@ export function TutorPanel({
           <CollapsibleSection
             title="How It Works (Step by Step)"
             icon={BookOpen}
-            accentColor="hsl(210,80%,60%)"
+            accentColor="hsl(var(--ed-sky))"
           >
             <div className="space-y-2">
               {explanation.stepByStepIntuition.map((step, i) => (
                 <div key={i} className="flex gap-3 items-start">
-                  <div className="w-5 h-5 rounded-full bg-[hsl(210,80%,60%/0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-[9px] font-bold text-[hsl(210,80%,60%)]">
+                  <div className="w-5 h-5 rounded-full bg-[hsl(var(--ed-sky)/0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-[9px] font-bold text-[hsl(var(--ed-sky))]">
                       {i + 1}
                     </span>
                   </div>
@@ -373,7 +373,7 @@ export function TutorPanel({
             <CollapsibleSection
               title="Complexity Deep Dive"
               icon={Timer}
-              accentColor="hsl(168,80%,48%)"
+              accentColor="hsl(var(--ed-teal))"
             >
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg bg-muted/20 border border-border/40 p-3">
@@ -381,7 +381,7 @@ export function TutorPanel({
                     <span className="text-[9px] font-semibold text-muted-foreground uppercase">
                       Time
                     </span>
-                    <span className="text-xs font-mono font-bold text-[hsl(168,80%,48%)]">
+                    <span className="text-xs font-mono font-bold text-[hsl(var(--ed-teal))]">
                       {explanation.complexityExplanation.time}
                     </span>
                   </div>
@@ -394,7 +394,7 @@ export function TutorPanel({
                     <span className="text-[9px] font-semibold text-muted-foreground uppercase">
                       Space
                     </span>
-                    <span className="text-xs font-mono font-bold text-[hsl(260,60%,62%)]">
+                    <span className="text-xs font-mono font-bold text-[hsl(var(--ed-purple))]">
                       {explanation.complexityExplanation.space}
                     </span>
                   </div>
@@ -410,7 +410,7 @@ export function TutorPanel({
           <CollapsibleSection
             title="From Brute Force to Optimal"
             icon={TrendingUp}
-            accentColor="hsl(260,60%,62%)"
+            accentColor="hsl(var(--ed-purple))"
           >
             <div className="space-y-3">
               <div className="rounded-lg bg-red-500/5 border border-red-500/15 p-3">
@@ -433,29 +433,29 @@ export function TutorPanel({
                 </p>
               </div>
               <div className="flex items-center justify-center">
-                <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[hsl(260,60%,62%/0.1)]">
-                  <TrendingUp className="w-3 h-3 text-[hsl(260,60%,62%)]" />
-                  <span className="text-[9px] font-semibold text-[hsl(260,60%,62%)]">
+                <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[hsl(var(--ed-purple)/0.1)]">
+                  <TrendingUp className="w-3 h-3 text-[hsl(var(--ed-purple))]" />
+                  <span className="text-[9px] font-semibold text-[hsl(var(--ed-purple))]">
                     Optimize
                   </span>
                 </div>
               </div>
-              <div className="rounded-lg bg-[hsl(168,80%,48%/0.06)] border border-[hsl(168,80%,48%/0.15)] p-3">
+              <div className="rounded-lg bg-[hsl(var(--ed-teal)/0.06)] border border-[hsl(var(--ed-teal)/0.15)] p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge
                     variant="outline"
-                    className="text-[9px] bg-[hsl(168,80%,48%/0.1)] text-[hsl(168,80%,48%)] border-[hsl(168,80%,48%/0.2)] px-1.5 py-0"
+                    className="text-[9px] bg-[hsl(var(--ed-teal)/0.1)] text-[hsl(var(--ed-teal))] border-[hsl(var(--ed-teal)/0.2)] px-1.5 py-0"
                   >
                     Optimal
                   </Badge>
-                  <span className="text-[10px] font-mono font-bold text-[hsl(168,80%,48%)]">
+                  <span className="text-[10px] font-mono font-bold text-[hsl(var(--ed-teal))]">
                     {explanation.bruteForceToOptimal.optimal.complexity}
                   </span>
                 </div>
                 <p className="text-xs text-foreground/70 leading-relaxed">
                   {explanation.bruteForceToOptimal.optimal.approach}
                 </p>
-                <p className="text-[10px] text-[hsl(168,80%,48%)] mt-1.5 font-medium">
+                <p className="text-[10px] text-[hsl(var(--ed-teal))] mt-1.5 font-medium">
                   Key insight:{" "}
                   {explanation.bruteForceToOptimal.optimal.keyInsight}
                 </p>
@@ -473,7 +473,7 @@ export function TutorPanel({
             <CollapsibleSection
               title="Edge Cases & Gotchas"
               icon={AlertCircle}
-              accentColor="hsl(30,90%,55%)"
+              accentColor="hsl(var(--ed-orange))"
             >
               <div className="space-y-2.5">
                 {explanation.edgeCases.map((ec, i) => (
@@ -481,14 +481,14 @@ export function TutorPanel({
                     key={i}
                     className="rounded-lg border border-border/40 overflow-hidden"
                   >
-                    <div className="bg-[hsl(30,90%,55%/0.06)] px-3 py-2 border-b border-border/30">
+                    <div className="bg-[hsl(var(--ed-orange)/0.06)] px-3 py-2 border-b border-border/30">
                       <p className="text-xs font-semibold text-foreground/90">
                         {ec.case}
                       </p>
                     </div>
                     <div className="px-3 py-2 space-y-1 bg-muted/5">
                       <p className="text-[11px] text-foreground/70">
-                        <span className="text-[hsl(168,80%,48%)] font-medium">
+                        <span className="text-[hsl(var(--ed-teal))] font-medium">
                           Handle:{" "}
                         </span>
                         {ec.howToHandle}
@@ -509,7 +509,7 @@ export function TutorPanel({
             <CollapsibleSection
               title="Flashcards"
               icon={Layers}
-              accentColor="hsl(260,60%,62%)"
+              accentColor="hsl(var(--ed-purple))"
               badge={`${explanation.flashcards.length} cards`}
             >
               <Flashcards cards={explanation.flashcards} />
@@ -520,7 +520,7 @@ export function TutorPanel({
           <CollapsibleSection
             title="Where It's Used (Real World)"
             icon={Rocket}
-            accentColor="hsl(168,80%,48%)"
+            accentColor="hsl(var(--ed-teal))"
           >
             <div className="space-y-2.5">
               {explanation.realWorldApplications.map((app, i) => (
@@ -543,7 +543,7 @@ export function TutorPanel({
           <CollapsibleSection
             title="Common Mistakes"
             icon={AlertTriangle}
-            accentColor="hsl(30,90%,55%)"
+            accentColor="hsl(var(--ed-orange))"
           >
             <div className="space-y-2">
               {explanation.commonMistakes.map((mistake, i) => (
@@ -561,12 +561,12 @@ export function TutorPanel({
           <CollapsibleSection
             title="Interview Tips"
             icon={Award}
-            accentColor="hsl(260,60%,62%)"
+            accentColor="hsl(var(--ed-purple))"
           >
             <div className="space-y-2">
               {explanation.interviewTips.map((tip, i) => (
                 <div key={i} className="flex gap-2 items-start">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[hsl(260,60%,62%)] mt-1.5 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--ed-purple))] mt-1.5 flex-shrink-0" />
                   <p className="text-xs text-foreground/70 leading-relaxed">
                     {tip}
                   </p>
@@ -581,7 +581,7 @@ export function TutorPanel({
               <CollapsibleSection
                 title="Similar Problems to Practice"
                 icon={Puzzle}
-                accentColor="hsl(210,70%,55%)"
+                accentColor="hsl(var(--ed-sky))"
               >
                 <div className="space-y-2">
                   {explanation.similarProblems.map((prob, i) => {
@@ -621,7 +621,7 @@ export function TutorPanel({
           <CollapsibleSection
             title="Related Algorithms"
             icon={GitBranch}
-            accentColor="hsl(210,70%,55%)"
+            accentColor="hsl(var(--ed-sky))"
           >
             <div className="flex flex-wrap gap-2">
               {explanation.relatedAlgorithms.map((rel, i) => (

@@ -1,4 +1,4 @@
-PORT ?= 3000
+PORT ?= 3002
 
 .PHONY: dev kill-port
 

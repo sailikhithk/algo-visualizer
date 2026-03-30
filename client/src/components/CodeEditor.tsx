@@ -73,12 +73,13 @@ export function CodeEditor({
           </Button>
         </div>
       </div>
-      <div className="relative flex-1 min-h-0 overflow-hidden">
-        <div className="absolute left-0 top-0 bottom-0 w-10 bg-muted/30 border-r border-border/30 flex flex-col pt-2">
+      {/* Code area always dark — matches Codecademy / Educative editors */}
+      <div className="relative flex-1 min-h-0 overflow-hidden bg-[#0d1117] dark:bg-transparent rounded-b-lg">
+        <div className="absolute left-0 top-0 bottom-0 w-10 bg-[#161b22] dark:bg-muted/30 border-r border-[#21262d] dark:border-border/30 flex flex-col pt-2">
           {code.split("\n").map((_, i) => (
             <span
               key={i}
-              className="text-[10px] text-muted-foreground/50 text-right pr-2 leading-[1.65rem] select-none font-mono"
+              className="text-[10px] text-[#484f58] dark:text-muted-foreground/50 text-right pr-2 leading-[1.65rem] select-none font-mono"
             >
               {i + 1}
             </span>
@@ -88,7 +89,7 @@ export function CodeEditor({
           ref={textareaRef}
           value={code}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full h-full bg-transparent text-foreground font-mono text-xs leading-[1.65rem] p-2 pl-12 resize-none focus:outline-none"
+          className="w-full h-full bg-transparent text-[#e6edf3] dark:text-foreground font-mono text-xs leading-[1.65rem] p-2 pl-12 resize-none focus:outline-none"
           spellCheck={false}
           data-testid="input-code"
         />
