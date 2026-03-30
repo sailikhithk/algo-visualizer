@@ -821,13 +821,15 @@ export function extractGraphFromCode(code: string): {
   const edges: [string, string, number?][] = [];
 
   // Match adjacency list patterns
-  const adjMatch = code.matchAll(
-    /['"](\w+)['"]\s*:\s*\[((?:[^[\]]*|\[(?:[^[\]]*|\[[^[\]]*\])*\])*)\]/g,
+  const adjMatch = Array.from(
+    code.matchAll(
+      /['"](\ w+)['"]\s*:\s*\[((?:[^[\]]*|\[(?:[^[\]]*|\[[^[\]]*\])*\])*)\]/g,
+    ),
   );
   for (const m of adjMatch) {
     const from = m[1];
     nodes.add(from);
-    const neighbors = m[2].matchAll(/['"](\w+)['"]/g);
+    const neighbors = Array.from(m[2].matchAll(/['"](\w+)['"]/g));
     for (const n of neighbors) {
       nodes.add(n[1]);
       edges.push([from, n[1]]);
@@ -858,7 +860,7 @@ export function extractTreeFromCode(code: string): {
   right?: any;
 } {
   // Try to find tree construction
-  const insertValues = code.matchAll(/insert\s*\(\s*(\d+)\s*\)/g);
+  const insertValues = Array.from(code.matchAll(/insert\s*\(\s*(\d+)\s*\)/g));
   const values: number[] = [];
   for (const m of insertValues) {
     values.push(parseInt(m[1]));

@@ -26,14 +26,12 @@ function layoutTree(
     value: node.value,
     x,
     y,
-    left: layoutTree(node.left, x - xSpread, y + 60, xSpread * 0.55, level + 1),
-    right: layoutTree(
-      node.right,
-      x + xSpread,
-      y + 60,
-      xSpread * 0.55,
-      level + 1,
-    ),
+    left:
+      layoutTree(node.left, x - xSpread, y + 60, xSpread * 0.55, level + 1) ??
+      undefined,
+    right:
+      layoutTree(node.right, x + xSpread, y + 60, xSpread * 0.55, level + 1) ??
+      undefined,
   };
 }
 

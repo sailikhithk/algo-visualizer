@@ -1,37 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  Play,
-  Pause,
-  SkipForward,
-  SkipBack,
-  RotateCcw,
-  Zap,
-  Clock,
-  HardDrive,
-  ChevronRight,
-  Code2,
-  BarChart3,
-  BookOpen,
-  GraduationCap,
-  Loader2,
-  Brain,
-} from "lucide-react";
+import { BarChart3, Loader2 } from "lucide-react";
 import {
   detectAlgorithm,
   extractArrayFromCode,
@@ -59,18 +27,28 @@ import {
   slidingWindowSteps,
   type VisualizationStep,
 } from "@/lib/visualizationEngine";
-import { ArrayVisualizer } from "@/components/ArrayVisualizer";
-import { GraphVisualizer } from "@/components/GraphVisualizer";
-import { TreeVisualizer } from "@/components/TreeVisualizer";
-import { LinkedListVisualizer } from "@/components/LinkedListVisualizer";
+import { ArrayVisualizer } from "@/components/visualizers/ArrayVisualizer";
+import { GraphVisualizer } from "@/components/visualizers/GraphVisualizer";
+import { TreeVisualizer } from "@/components/visualizers/TreeVisualizer";
+import { LinkedListVisualizer } from "@/components/visualizers/LinkedListVisualizer";
 import {
   AIVisualizer,
   type AIVisualizationType,
-} from "@/components/AIVisualizer";
-import { SAMPLE_CODES, CATEGORY_SAMPLES } from "@/lib/sampleCode";
+} from "@/components/visualizers/AIVisualizer";
+import { SAMPLE_CODES } from "@/lib/sampleCode";
 import { PerplexityAttribution } from "@/components/PerplexityAttribution";
-import { TutorPanel, type TutorExplanation } from "@/components/TutorPanel";
+import {
+  TutorPanel,
+  type TutorExplanation,
+} from "@/components/editorial/TutorPanel";
 import { apiRequest } from "@/lib/queryClient";
+
+import { Header } from "@/components/Header";
+import { TemplatePicker } from "@/components/TemplatePicker";
+import { CodeEditor } from "@/components/CodeEditor";
+import { PlaybackControls } from "@/components/PlaybackControls";
+import { AlgorithmInfo } from "@/components/AlgorithmInfo";
+import { VisualizationPanel } from "@/components/VisualizationPanel";
 
 const DEFAULT_CODE = SAMPLE_CODES.bubble_sort.code;
 
@@ -101,7 +79,6 @@ export default function Home() {
   const [treeData, setTreeData] = useState<any>(null);
   const [maxArrayVal, setMaxArrayVal] = useState(100);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // AI Tutor state
   const [tutorExplanation, setTutorExplanation] =
@@ -121,9 +98,6 @@ export default function Home() {
   } | null>(null);
   const [aiVizLoading, setAiVizLoading] = useState(false);
   const [aiVizError, setAiVizError] = useState<string | null>(null);
-
-  // Algorithm types that should fall back to AI visualization
-  // (defined above as module-level constant)
 
   const generateSteps = useCallback(
     (alg: DetectedAlgorithm, sourceCode: string) => {
@@ -196,9 +170,6 @@ export default function Home() {
           generator = slidingWindowSteps(arr);
           break;
         default:
-          // AI-viz algorithms: don't generate fake steps — leave steps empty
-          // so the UI shows the "Paste code and click Visualize" placeholder
-          // until the AI viz result arrives.
           if (AI_VIZ_TYPES.has(alg.type)) return;
           generator = bubbleSortSteps(arr);
           break;
@@ -250,7 +221,6 @@ export default function Home() {
       if (data.result && data.result.steps?.length > 0) {
         const { steps: aiSteps, ...meta } = data.result;
         setAiVizResult(meta);
-        // Feed AI steps directly into the existing playback system
         setSteps(aiSteps);
         setCurrentStep(0);
         setIsPlaying(false);
@@ -270,7 +240,6 @@ export default function Home() {
     setAiVizResult(null);
     setAiVizError(null);
     generateSteps(alg, code);
-    // Auto-trigger AI viz for complex/unknown algorithms
     if (AI_VIZ_TYPES.has(alg.type)) {
       handleAIVisualize(code);
     }
@@ -283,7 +252,6 @@ export default function Home() {
     setAiVizError(null);
     generateSteps(alg, code);
     fetchTutorExplanation(code, alg);
-    // Also trigger AI viz for complex/unknown algorithms
     if (AI_VIZ_TYPES.has(alg.type)) {
       handleAIVisualize(code);
     }
@@ -323,7 +291,6 @@ export default function Home() {
   const currentStepData = steps[currentStep] || null;
 
   const renderVisualization = () => {
-    // Loading state for AI viz
     if (aiVizLoading) {
       return (
         <div className="flex flex-col items-center justify-center h-40 text-muted-foreground gap-3">
@@ -345,7 +312,6 @@ export default function Home() {
       );
     }
 
-    // AI-generated visualization
     if (aiVizResult) {
       return (
         <AIVisualizer
@@ -372,7 +338,6 @@ export default function Home() {
     if (cat === "linked_list") {
       return <LinkedListVisualizer step={currentStepData} />;
     }
-    // Default: array-based visualization
     return <ArrayVisualizer step={currentStepData} maxVal={maxArrayVal} />;
   };
 
@@ -381,375 +346,66 @@ export default function Home() {
     handleVisualize();
   }, []);
 
+  // AlgorithmInfo needs "name" for aiVizResult (it uses "algorithmName" internally)
+  const aiVizForInfo = aiVizResult
+    ? { ...aiVizResult, name: aiVizResult.algorithmName }
+    : null;
+
   return (
     <div className="h-screen flex flex-col bg-background dark overflow-hidden">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm flex-shrink-0">
-        <div className="w-full px-4 sm:px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[hsl(168,80%,48%)] flex items-center justify-center flex-shrink-0">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-label="Algorithm Visualizer logo"
-              >
-                <path
-                  d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3z"
-                  stroke="hsl(225,25%,6%)"
-                  strokeWidth="2"
-                  fill="none"
-                />
-                <path
-                  d="M17.5 14v7M14 17.5h7"
-                  stroke="hsl(225,25%,6%)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-sm font-bold tracking-tight text-foreground">
-                AlgoViz
-              </h1>
-              <p className="text-[10px] text-muted-foreground hidden sm:block">
-                Algorithm Visualizer
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge
-              variant="outline"
-              className="text-[10px] font-mono bg-[hsl(168,80%,48%/0.1)] text-[hsl(168,80%,48%)] border-[hsl(168,80%,48%/0.3)] hidden sm:flex"
-            >
-              Interview Prep
-            </Badge>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="flex-1 min-h-0 overflow-y-auto">
         <div className="flex flex-col min-h-full">
           <div className="flex-1 min-h-[70vh] grid grid-cols-1 lg:grid-cols-12 gap-3 p-3 sm:p-4">
-            {/* LEFT: Code Editor + Samples — shown below visualization on mobile */}
+            {/* LEFT: Code Editor + Samples */}
             <div className="lg:col-span-5 flex flex-col gap-3 order-2 lg:order-1 min-h-0">
-              {/* Sample Algorithm Picker */}
-              <Card className="p-3 bg-card border-border/50">
-                <div className="flex items-center gap-2 mb-2">
-                  <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Templates
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {Object.entries(CATEGORY_SAMPLES).map(([category, keys]) => (
-                    <Select key={category} onValueChange={loadSample}>
-                      <SelectTrigger
-                        className="h-7 w-auto text-[11px] bg-muted/50 border-0 px-2.5 gap-1"
-                        data-testid={`select-${category}`}
-                      >
-                        <SelectValue placeholder={category} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {keys.map((key) => (
-                          <SelectItem key={key} value={key} className="text-xs">
-                            {SAMPLE_CODES[key]?.title || key}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ))}
-                </div>
-              </Card>
-
-              {/* Code Editor */}
-              <Card className="flex-1 min-h-0 flex flex-col bg-card border-border/50 overflow-hidden">
-                <div className="flex items-center justify-between px-3 py-2 border-b border-border/50">
-                  <div className="flex items-center gap-2">
-                    <Code2 className="w-3.5 h-3.5 text-[hsl(168,80%,48%)]" />
-                    <span className="text-xs font-semibold text-foreground">
-                      Python Code
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Button
-                      size="sm"
-                      onClick={handleVisualize}
-                      className="h-7 text-xs bg-[hsl(168,80%,48%)] hover:bg-[hsl(168,80%,55%)] text-[hsl(225,25%,6%)] font-semibold gap-1"
-                      data-testid="button-visualize"
-                    >
-                      <Zap className="w-3 h-3" />
-                      Visualize
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handleAIVisualize(code)}
-                      className="h-7 text-xs bg-[hsl(260,60%,62%)] hover:bg-[hsl(260,60%,70%)] text-white font-semibold gap-1"
-                      disabled={aiVizLoading}
-                      data-testid="button-ai-visualize"
-                    >
-                      {aiVizLoading ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <Brain className="w-3 h-3" />
-                      )}
-                      AI Viz
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={handleVisualizeAndLearn}
-                      className="h-7 text-xs bg-gradient-to-r from-[hsl(168,80%,48%)] to-[hsl(260,60%,62%)] hover:from-[hsl(168,80%,55%)] hover:to-[hsl(260,60%,68%)] text-white font-semibold gap-1"
-                      disabled={tutorLoading}
-                      data-testid="button-learn"
-                    >
-                      {tutorLoading ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <GraduationCap className="w-3 h-3" />
-                      )}
-                      Learn
-                    </Button>
-                  </div>
-                </div>
-                <div className="relative flex-1 min-h-0 overflow-hidden">
-                  <div className="absolute left-0 top-0 bottom-0 w-10 bg-muted/30 border-r border-border/30 flex flex-col pt-2">
-                    {code.split("\n").map((_, i) => (
-                      <span
-                        key={i}
-                        className="text-[10px] text-muted-foreground/50 text-right pr-2 leading-[1.65rem] select-none font-mono"
-                      >
-                        {i + 1}
-                      </span>
-                    ))}
-                  </div>
-                  <textarea
-                    ref={textareaRef}
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    className="w-full h-full bg-transparent text-foreground font-mono text-xs leading-[1.65rem] p-2 pl-12 resize-none focus:outline-none"
-                    spellCheck={false}
-                    data-testid="input-code"
-                  />
-                </div>
-              </Card>
+              <TemplatePicker onSelect={loadSample} />
+              <CodeEditor
+                code={code}
+                onChange={setCode}
+                onVisualize={handleVisualize}
+                onAIVisualize={() => handleAIVisualize(code)}
+                onLearn={handleVisualizeAndLearn}
+                aiVizLoading={aiVizLoading}
+                tutorLoading={tutorLoading}
+              />
             </div>
 
-            {/* RIGHT: Visualization + Controls + Info — shown FIRST on mobile */}
+            {/* RIGHT: Visualization + Controls + Info */}
             <div className="lg:col-span-7 flex flex-col gap-3 order-1 lg:order-2 min-h-0">
-              {/* Visualization Panel */}
-              <Card className="flex-1 min-h-0 bg-card border-border/50 overflow-hidden flex flex-col">
-                <div className="px-3 py-2 border-b border-border/50 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <BarChart3 className="w-3.5 h-3.5 text-[hsl(260,60%,62%)]" />
-                    <span className="text-xs font-semibold text-foreground">
-                      Visualization
-                    </span>
-                  </div>
-                  {(aiVizResult ||
-                    (detected && detected.type !== "unknown")) && (
-                    <Badge
-                      variant="outline"
-                      className={`text-[10px] font-mono ${aiVizResult ? "border-[hsl(260,60%,62%)] text-[hsl(260,60%,62%)]" : ""}`}
-                    >
-                      {aiVizResult
-                        ? `AI: ${aiVizResult.algorithmName}`
-                        : detected?.name}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex-1 min-h-0 p-2 sm:p-4 grid-bg flex items-center justify-center overflow-auto">
-                  {renderVisualization()}
-                </div>
-                {/* Step message */}
-                {currentStepData && (
-                  <div className="px-4 py-2 border-t border-border/50 bg-muted/20">
-                    <p className="text-xs font-mono text-muted-foreground">
-                      <span className="text-[hsl(168,80%,48%)]">
-                        Step {currentStep + 1}/{steps.length}
-                      </span>
-                      <span className="mx-2 text-border">|</span>
-                      {currentStepData.message}
-                    </p>
-                  </div>
-                )}
-              </Card>
+              <VisualizationPanel
+                detected={detected}
+                aiVizResult={aiVizResult}
+                currentStepData={currentStepData}
+                currentStep={currentStep}
+                totalSteps={steps.length}
+              >
+                {renderVisualization()}
+              </VisualizationPanel>
 
-              {/* Playback Controls */}
-              <Card className="p-3 bg-card border-border/50">
-                <div className="flex flex-wrap items-center gap-2">
-                  {/* Transport */}
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => {
-                            setCurrentStep(0);
-                            setIsPlaying(false);
-                          }}
-                          disabled={steps.length === 0}
-                          data-testid="button-reset"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Reset</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() =>
-                            setCurrentStep(Math.max(0, currentStep - 1))
-                          }
-                          disabled={currentStep === 0 || steps.length === 0}
-                          data-testid="button-prev"
-                        >
-                          <SkipBack className="w-3.5 h-3.5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Previous Step</TooltipContent>
-                    </Tooltip>
-                    <Button
-                      size="icon"
-                      className="h-9 w-9 rounded-full bg-[hsl(168,80%,48%)] hover:bg-[hsl(168,80%,55%)] text-[hsl(225,25%,6%)]"
-                      onClick={() => setIsPlaying(!isPlaying)}
-                      disabled={steps.length === 0}
-                      data-testid="button-play"
-                    >
-                      {isPlaying ? (
-                        <Pause className="w-4 h-4" />
-                      ) : (
-                        <Play className="w-4 h-4 ml-0.5" />
-                      )}
-                    </Button>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() =>
-                            setCurrentStep(
-                              Math.min(steps.length - 1, currentStep + 1),
-                            )
-                          }
-                          disabled={
-                            currentStep >= steps.length - 1 ||
-                            steps.length === 0
-                          }
-                          data-testid="button-next"
-                        >
-                          <SkipForward className="w-3.5 h-3.5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Next Step</TooltipContent>
-                    </Tooltip>
-                  </div>
+              <PlaybackControls
+                currentStep={currentStep}
+                totalSteps={steps.length}
+                isPlaying={isPlaying}
+                speed={speed}
+                onStepChange={(step) => {
+                  setCurrentStep(step);
+                  setIsPlaying(false);
+                }}
+                onPlayToggle={() => setIsPlaying(!isPlaying)}
+                onReset={() => {
+                  setCurrentStep(0);
+                  setIsPlaying(false);
+                }}
+                onSpeedChange={setSpeed}
+              />
 
-                  {/* Progress */}
-                  <div className="flex-1 min-w-[80px]">
-                    <Slider
-                      value={[currentStep]}
-                      max={Math.max(steps.length - 1, 0)}
-                      step={1}
-                      onValueChange={([v]) => {
-                        setCurrentStep(v);
-                        setIsPlaying(false);
-                      }}
-                      className="w-full"
-                      data-testid="slider-progress"
-                    />
-                  </div>
-
-                  {/* Speed */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-muted-foreground font-mono">
-                      Speed
-                    </span>
-                    <Slider
-                      value={[1000 - speed]}
-                      max={950}
-                      step={50}
-                      onValueChange={([v]) => setSpeed(1000 - v)}
-                      className="w-20"
-                      data-testid="slider-speed"
-                    />
-                  </div>
-                </div>
-              </Card>
-
-              {/* Algorithm Info */}
-              {(aiVizResult || (detected && detected.type !== "unknown")) && (
-                <Card className="p-4 bg-card border-border/50">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <Zap className="w-3 h-3" />
-                        <span className="text-[10px] uppercase tracking-wider font-semibold">
-                          Algorithm
-                        </span>
-                      </div>
-                      <p className="text-sm font-semibold text-foreground">
-                        {aiVizResult?.algorithmName ?? detected?.name}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <Clock className="w-3 h-3" />
-                        <span className="text-[10px] uppercase tracking-wider font-semibold">
-                          Time
-                        </span>
-                      </div>
-                      <p className="text-sm font-mono font-bold text-[hsl(168,80%,48%)]">
-                        {aiVizResult?.timeComplexity ??
-                          detected?.timeComplexity}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <HardDrive className="w-3 h-3" />
-                        <span className="text-[10px] uppercase tracking-wider font-semibold">
-                          Space
-                        </span>
-                      </div>
-                      <p className="text-sm font-mono font-bold text-[hsl(260,60%,62%)]">
-                        {aiVizResult?.spaceComplexity ??
-                          detected?.spaceComplexity}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <ChevronRight className="w-3 h-3" />
-                        <span className="text-[10px] uppercase tracking-wider font-semibold">
-                          Category
-                        </span>
-                      </div>
-                      <Badge variant="secondary" className="text-[10px]">
-                        {(
-                          aiVizResult?.category ??
-                          detected?.category ??
-                          ""
-                        ).replace(/_/g, " ")}
-                      </Badge>
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-3 border-t border-border/30 pt-3">
-                    {aiVizResult?.description ?? detected?.description}
-                  </p>
-                </Card>
-              )}
+              <AlgorithmInfo detected={detected} aiVizResult={aiVizForInfo} />
             </div>
-            {/* end right column */}
           </div>
-          {/* end grid */}
 
-          {/* AI Tutor Panel — Full Width Below */}
+          {/* AI Tutor Panel */}
           {tutorOpen && (
             <div className="px-3 sm:px-4 pb-3">
               <TutorPanel
@@ -764,7 +420,6 @@ export default function Home() {
             <PerplexityAttribution />
           </footer>
         </div>
-        {/* end h-full flex flex-col */}
       </main>
     </div>
   );
